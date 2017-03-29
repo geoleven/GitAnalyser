@@ -5,9 +5,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 
 import base.ArgumentParser;
 
@@ -142,8 +145,6 @@ public class Parse {
 		String arg1 = new String("log");
 		String arg2 = new String("--pretty=s --format=\"%an\"");
 		String[] commandArray = {GIT_CMD, arg1, arg2};
-		for (String t : commandArray)
-			System.out.println(t);
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
 		try {
@@ -167,5 +168,93 @@ public class Parse {
 			return -1;
 		}
 	}
+	
+	public HashMap<String, BranchInfo> getInfoBranches() {
+		HashMap<String, BranchInfo> ret = new HashMap<String, BranchInfo>();
+			
+		
+		
+		
+		
+		String args = new String("branch");
+		String[] commandArray1 = {GIT_CMD, args};
+		pb = new ProcessBuilder(commandArray1);
+		pb.directory(inputFile);
+		try {
+			String branches = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+			String[] branchesSplit = branches.split("\r\n|\r|\n");
+			for (String br : branchesSplit) {
+				ret.put(br, new BranchInfo(br));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("getInfoBranches could not start or get stream for branches!");
+		}
+		
+		
+		
+		
+		
+		
+		String arg1 = new String("log");
+		String arg2 = new String("--all");
+		String arg3 = new String("--format=\"%H\"");
+		String arg4 = new String("--reverse");
+		String[] commandArray2 = {GIT_CMD, arg1, arg2, arg3, arg4};
+		pb = new ProcessBuilder(commandArray2);
+//		pb.directory(inputFile);
+		try {
+			String commits = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+//			System.out.println(commits);
+			BufferedReader reader = new BufferedReader(new StringReader(commits));
+			arg1 = "branch";
+			arg2 = "--contains";
+			String contOut = null;
+			BranchInfo curBrIn = null;
+			while ((arg3 = reader.readLine()) != null) {
+				String[] commandArray3 = {GIT_CMD, arg1, arg2, arg3};
+				ProcessBuilder pb2 = new ProcessBuilder(commandArray3);
+				contOut = IOUtils.toString(pb2.start().getInputStream(), (Charset)null);
+				String[] contOutsplit = contOut.split("\r\n|\r|\n");
+				for (String sbr : contOutsplit) {
+					//Tha eprepe na kanw elegxo ab yparxei to branch alla einai poly kako gia tin taxutita
+					curBrIn = ret.get(sbr);
+					arg1 = "show";
+					arg2 = "-s";
+					arg4 = arg3;
+					if (curBrIn.isInitial()) {
+						arg3 = "--format=%ci";
+						String[] commandArray4 = {GIT_CMD, arg1, arg2, arg3, arg4};
+						ProcessBuilder pb3 = new ProcessBuilder(commandArray4);
+						curBrIn.bDate = IOUtils.toString(pb3.start().getInputStream(), (Charset)null);
+					}
+					arg3 = "--format=%B";
+					String[] commandArray4 = {GIT_CMD, arg1, arg2, arg3, arg4};
+					ProcessBuilder pb3 = new ProcessBuilder(commandArray4);
+					curBrIn.bCommits.add(new BranchCommits(arg4, IOUtils.toString(pb3.start().getInputStream(), (Charset)null)));
+				}
+			}
+//			String[] commitersSplit = commiters.split("\r\n|\r|\n");
+//			HashMap<String, Integer> commitesCount = new HashMap<String, Integer>();
+//			for (String commiter : commitersSplit) {
+//				Integer temp = commitesCount.get(commiter);
+//				if(temp != null)
+//					commitesCount.put(commiter, commitesCount.get(commiter) + 1);
+//				else
+//					commitesCount.put(commiter, 1);
+//			}
+//			System.out.println("The number of commiters is: " + commitesCount.size());
+//			return commitesCount.size();
+		} catch (IOException e) {
+//			e.printStackTrace();
+//			System.err.println("commitersCount could not start or get stream!");
+//			return -1;
+		}
+		
+		return ret;		
+	}
+	
+	
+	
 	
 }
