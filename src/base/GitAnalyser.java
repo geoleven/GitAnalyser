@@ -23,6 +23,7 @@ public class GitAnalyser {
 //		p.branchCount();
 		System.out.println("Main branches count: " + p.branchCount());
 		System.out.println("Main tags count: " + p.tagsCount());
+		System.out.println("Main commiters count: " + p.commitersCount());
 		
 		System.out.println("\n\nNow exiting normally!");
 		

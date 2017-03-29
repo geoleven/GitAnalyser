@@ -1,12 +1,12 @@
 package parser;
 
-import java.io.BufferedReader;
+//import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.io.BufferedInputStream;
 
 import base.ArgumentParser;
@@ -25,9 +25,9 @@ public class Parse {
 	private String output = null;
 	private File inputFile = null;
 	private File outputFile = null;
-	private Process currentProcess = null;
+//	private Process currentProcess = null;
 	private ProcessBuilder pb = null; 
-	private BufferedReader processOutpoutStream = null;
+//	private BufferedReader processOutpoutStream = null;
 	private String filels = null;
 	//private String[] commandArray = null;
 	
@@ -134,6 +134,36 @@ public class Parse {
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("tagsCount could not start or get stream!");
+			return -1;
+		}
+	}
+	
+	public int commitersCount() {
+		String arg1 = new String("log");
+		String arg2 = new String("--pretty=s --format=\"%an\"");
+		String[] commandArray = {GIT_CMD, arg1, arg2};
+		for (String t : commandArray)
+			System.out.println(t);
+		pb = new ProcessBuilder(commandArray);
+		pb.directory(inputFile);
+		try {
+			pb.start();
+			InputStream is = pb.start().getInputStream();
+			String commiters = IOUtils.toString(is, (Charset)null);
+			String[] commitersSplit = commiters.split("\r\n|\r|\n");
+			HashMap<String, Integer> commitesCount = new HashMap<String, Integer>();
+			for (String commiter : commitersSplit) {
+				Integer temp = commitesCount.get(commiter);
+				if(temp != null)
+					commitesCount.put(commiter, commitesCount.get(commiter) + 1);
+				else
+					commitesCount.put(commiter, 1);
+			}
+			System.out.println("The number of commiters is: " + commitesCount.size());
+			return commitesCount.size();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("commitersCount could not start or get stream!");
 			return -1;
 		}
 	}
