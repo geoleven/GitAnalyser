@@ -16,6 +16,7 @@ public class BranchInfo {
 	
 	public BranchInfo(String bName) {
 		this.bName = bName;
+		this.bCommits = new LinkedList<BranchCommits>();
 	}
 	
 	public boolean isInitial() {

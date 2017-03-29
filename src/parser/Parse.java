@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 
@@ -200,10 +199,16 @@ public class Parse {
 		String arg2 = new String("--all");
 		String arg3 = new String("--format=\"%H\"");
 		String arg4 = new String("--reverse");
+		String arg5 = "show";
+		String arg6 = "-s";
+		String arg7 = "describe";
+		String arg8 = "--exact-match";
+		
 		String[] commandArray2 = {GIT_CMD, arg1, arg2, arg3, arg4};
 		pb = new ProcessBuilder(commandArray2);
-//		pb.directory(inputFile);
+		pb.directory(inputFile);
 		try {
+			// Pairnoume OLA ta commits gia na ta valoume ena ena
 			String commits = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 //			System.out.println(commits);
 			BufferedReader reader = new BufferedReader(new StringReader(commits));
@@ -211,42 +216,48 @@ public class Parse {
 			arg2 = "--contains";
 			String contOut = null;
 			BranchInfo curBrIn = null;
+			//Gia kathe commit koitamai oles tis alusides stis opoies anoikei kai to topothetoume
 			while ((arg3 = reader.readLine()) != null) {
+				
+				//Pairnoume oles tis alusides
 				String[] commandArray3 = {GIT_CMD, arg1, arg2, arg3};
 				ProcessBuilder pb2 = new ProcessBuilder(commandArray3);
+				pb2.directory(inputFile);
 				contOut = IOUtils.toString(pb2.start().getInputStream(), (Charset)null);
 				String[] contOutsplit = contOut.split("\r\n|\r|\n");
+				
+				//Pairnoume ta info tou commit gia na ta exoume se ola ta for
+				arg4 = "--format=%B";
+				String[] commandArray4 = {GIT_CMD, arg5, arg6, arg4, arg3};
+				ProcessBuilder pb3 = new ProcessBuilder(commandArray4);
+				pb3.directory(inputFile);
+				String commitFullMessage = IOUtils.toString(pb3.start().getInputStream(), (Charset)null);
+				
+				//Kai ta exact tags tou commit
+				String[] commandArray6 = {GIT_CMD, arg7, arg8, arg3};
+				ProcessBuilder pb5 = new ProcessBuilder(commandArray6);
+				pb5.directory(inputFile);
+				String curtag = IOUtils.toString(pb5.start().getInputStream(), (Charset)null);
+				if (curtag.startsWith("fatal: no tag exactly matches '" + arg3 + "'"))
+					curtag = null;
+				
+				
 				for (String sbr : contOutsplit) {
 					//Tha eprepe na kanw elegxo ab yparxei to branch alla einai poly kako gia tin taxutita
 					curBrIn = ret.get(sbr);
-					arg1 = "show";
-					arg2 = "-s";
-					arg4 = arg3;
+					// Ean einai to prwto commit tis alusidas orizoume to creation date tou san creation kai tis alusidas
 					if (curBrIn.isInitial()) {
-						arg3 = "--format=%ci";
-						String[] commandArray4 = {GIT_CMD, arg1, arg2, arg3, arg4};
-						ProcessBuilder pb3 = new ProcessBuilder(commandArray4);
-						curBrIn.bDate = IOUtils.toString(pb3.start().getInputStream(), (Charset)null);
+						arg4 = "--format=%ci";
+						String[] commandArray5 = {GIT_CMD, arg5, arg6, arg4, arg3};
+						ProcessBuilder pb4 = new ProcessBuilder(commandArray5);
+						pb4.directory(inputFile);
+						curBrIn.bDate = IOUtils.toString(pb4.start().getInputStream(), (Charset)null);
 					}
-					arg3 = "--format=%B";
-					String[] commandArray4 = {GIT_CMD, arg1, arg2, arg3, arg4};
-					ProcessBuilder pb3 = new ProcessBuilder(commandArray4);
-					curBrIn.bCommits.add(new BranchCommits(arg4, IOUtils.toString(pb3.start().getInputStream(), (Charset)null)));
+					curBrIn.bCommits.add(new BranchCommits(arg3, commitFullMessage, curtag));
 				}
 			}
-//			String[] commitersSplit = commiters.split("\r\n|\r|\n");
-//			HashMap<String, Integer> commitesCount = new HashMap<String, Integer>();
-//			for (String commiter : commitersSplit) {
-//				Integer temp = commitesCount.get(commiter);
-//				if(temp != null)
-//					commitesCount.put(commiter, commitesCount.get(commiter) + 1);
-//				else
-//					commitesCount.put(commiter, 1);
-//			}
-//			System.out.println("The number of commiters is: " + commitesCount.size());
-//			return commitesCount.size();
 		} catch (IOException e) {
-//			e.printStackTrace();
+			e.printStackTrace();
 //			System.err.println("commitersCount could not start or get stream!");
 //			return -1;
 		}

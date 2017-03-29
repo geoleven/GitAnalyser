@@ -5,9 +5,9 @@ public class BranchCommits {
 	public String message = null;
 	public String tag = null;
 	
-	public BranchCommits(String id, String message){//, String tag){
+	public BranchCommits(String id, String message, String tag){
 		this.id = id;
 		this.message = message;
-//		this.tag = tag;
+		this.tag = tag;
 	}
 }

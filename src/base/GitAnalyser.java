@@ -1,5 +1,7 @@
 package base;
 
+import parser.BranchCommits;
+import parser.BranchInfo;
 import parser.Parse;
 
 public class GitAnalyser {
@@ -24,7 +26,14 @@ public class GitAnalyser {
 		System.out.println("Main branches count: " + p.branchCount());
 		System.out.println("Main tags count: " + p.tagsCount());
 		System.out.println("Main commiters count: " + p.commitersCount());
-		System.out.println("Main commiters count: " + p.getInfoBranches());
+		for (BranchInfo bi : p.getInfoBranches().values()) {
+			System.out.println("\n\n" + bi.bName + " " + bi.bDate);
+			for (BranchCommits bc : bi.bCommits){
+				System.out.print(bc.id + " " + bc.message);
+				System.out.println(bc.tag == null ? "" : bc.tag);
+			}
+		}
+			
 		
 		System.out.println("\n\nNow exiting normally!");
 		
