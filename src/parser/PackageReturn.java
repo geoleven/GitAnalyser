@@ -21,4 +21,11 @@ public class PackageReturn {
 		this.commitsPerBranch = new HashMap<String, Double>();
 		this.commitsPerBrPerAu = new HashMap<String, AuthorAndBranch>();
 	}
+	
+	public PackageReturn(){
+		this.commits = 0;
+		this.commitsPerAuthor = new HashMap<String, Double>();
+		this.commitsPerBranch = new HashMap<String, Double>();
+		this.commitsPerBrPerAu = new HashMap<String, AuthorAndBranch>();
+	}
 }

@@ -278,6 +278,7 @@ public class Parse {
 	
 	public PackageReturn percentages() {
 		
+		PackageReturn ret = new PackageReturn();
 		String arg1 = new String("log");
 		String arg2 = new String("--all");
 		String arg3 = new String("--format=\"%H\"");
