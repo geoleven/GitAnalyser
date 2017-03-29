@@ -291,7 +291,7 @@ public class Parse {
 			try {
 				String commits = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 				String[] commitsSplit = commits.split("\r\n|\r|\n");
-				int commitsSum = 0;
+				int commitsSum = commitsSplit.length;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
