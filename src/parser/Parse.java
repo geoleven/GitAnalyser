@@ -168,6 +168,11 @@ public class Parse {
 		}
 	}
 	
+	
+	
+	
+	
+	
 	public HashMap<String, BranchInfo> getInfoBranches() {
 		HashMap<String, BranchInfo> ret = new HashMap<String, BranchInfo>();
 			
@@ -258,14 +263,41 @@ public class Parse {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-//			System.err.println("commitersCount could not start or get stream!");
-//			return -1;
+			System.err.println("getInfoBranches could not start or get stream or something!");
+			return null;
 		}
 		
 		return ret;		
 	}
 	
 	
+	
+	
+	
+	
+	
+	public PackageReturn percentages() {
+		
+		String arg1 = new String("log");
+		String arg2 = new String("--all");
+		String arg3 = new String("--format=\"%H\"");
+		String arg4 = new String("--reverse");
+		
+		String[] commandArray1 = {GIT_CMD, arg1, arg2, arg3, arg4};
+		pb = new ProcessBuilder(commandArray1);
+		pb.directory(inputFile);
+		
+			;
+			try {
+				String commits = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+				String[] commitsSplit = commits.split("\r\n|\r|\n");
+				int commitsSum = 0;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		
+		return null;
+	}
 	
 	
 }
