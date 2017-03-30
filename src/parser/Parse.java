@@ -1,17 +1,12 @@
 package parser;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.sql.Timestamp;
 import java.util.HashMap;
-import java.util.Map;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 
 import base.ArgumentParser;
@@ -21,18 +16,13 @@ import org.apache.commons.io.IOUtils;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
-public class Parse {
-	
-	private static final boolean ALLDELIMETERS = true;
-	
-	private static final String GIT_DIR = "C:\\Program Files\\Git\\bin\\";
+public class Parse {	
 	private static final String GIT_CMD = "git";
-
 	
 	private String input = null;
-	private String output = null;
+//	private String output = null;
 	private File inputFile = null;
-	private File outputFile = null;
+//	private File outputFile = null;
 	private ProcessBuilder pb = null; 
 	private String filels = null;
 	private HashMap<String, Integer> commitsPerAuthCount = null;
@@ -44,65 +34,10 @@ public class Parse {
 	
 	public Parse(ArgumentParser ap) {	
 		this.input = ap.input;
-		this.output = ap.output;
+//		this.output = ap.output;
 		this.inputFile = ap.inputFile;
-		this.outputFile = ap.outputFile;
+//		this.outputFile = ap.outputFile;
 	}
-	
-//	private static int countLines(String filename) {
-//	    try {
-//	    	InputStream is = new BufferedInputStream(new FileInputStream(filename));
-//	        byte[] c = new byte[1024];
-//	        int count = 0;
-//	        int readChars = 0;
-//	        boolean empty = true;
-//	        while ((readChars = is.read(c)) != -1) {
-//	            empty = false;
-//	            for (int i = 0; i < readChars; ++i) {
-//	            	if (ALLDELIMETERS) {
-//		                if (c[i] == '\n' || c[i] == '\r') {	           
-//		                    ++count;
-//		                    if (c[i] == '\r' && (i+1) < readChars && c[i+1] == '\n')
-//		                    	++i;
-//		                }
-//	            	} else {
-//		                if (c[i] == '\n') {	           
-//		                    ++count;
-//		                }
-//	            	}
-//	            }
-//	        }
-//	        is.close();
-//	        return (count == 0 && !empty) ? 1 : count;
-//	    } catch(IOException e) {
-//	       e.printStackTrace();
-//	       System.err.println("TotalLinesCount could not open some file!");
-//	       return 0;
-//	    }
-//	}
-	
-	
-////	Toooooooooo slow
-//	private static int countLines(String filename) {
-//	    LineNumberReader reader = null;
-//	    try {
-//	        reader = new LineNumberReader(new FileReader(filename));
-//	        while ((reader.readLine()) != null);
-//	        return reader.getLineNumber();
-//	    } catch (Exception ex) {
-//	        return -1;
-//	    } finally { 
-//	        if(reader != null)
-//				try {
-//					reader.close();
-//				} catch (IOException e) {
-//					System.err.println("Could not close file in countLines!");
-//					e.printStackTrace();
-//				}
-//	    }
-//	}
-	
-	
 
 //	3rd try XD
 	private static int countLines(String filename) {
@@ -150,21 +85,6 @@ public class Parse {
 		return linesSum;
 	}
 	
-//	private String getAllBranches() {
-//		String args = new String("branch");
-//		String[] commandArray = {GIT_CMD, args};
-//		pb = new ProcessBuilder(commandArray);
-//		pb.directory(inputFile);
-//		try {
-//			String branches = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
-//			return branches;
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			System.err.println("getAllBranches could not start or get stream!");
-//			return "";
-//		}
-//	}
-	
 	private String getAllBranchesPlusLastCommit() {
 		String arg1 = "for-each-ref";
 		String arg2 = "refs/heads/";
@@ -174,7 +94,6 @@ public class Parse {
 		pb.directory(inputFile);
 		try {
 			String branches = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
-//			System.out.println("'" + branches + "'");
 			return branches;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -252,7 +171,6 @@ public class Parse {
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
 		try {
-			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 			return ret;
 		} catch (IOException e) {
@@ -269,7 +187,6 @@ public class Parse {
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
 		try {
-			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 			return ret;
 		} catch (IOException e) {
@@ -283,7 +200,6 @@ public class Parse {
 		String arg1 = "show";
 		String arg2 = "-s";
 		String arg3;
-		//arg3 =  (type == 0) ? "--format=%B" : "--format=%ci";
 		if (type == 0)
 			arg3 = "--format=%B";
 		else if (type == 1)
@@ -296,7 +212,6 @@ public class Parse {
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
 		try {
-			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 			if (ret.endsWith("\n"))
 				ret = ret.substring(0, ret.lastIndexOf("\n"));
@@ -337,39 +252,24 @@ public class Parse {
 		String branches = getAllBranchesPlusLastCommit();
 		String[] branchesSplit = branches.split("\r\n|\r|\n");
 		for (String br : branchesSplit) {
-//			if (br.startsWith("*"))
-//				branchInfoMap.put(br.substring(2), new BranchInfo(br.substring(2)));
-//			else
-//			if (br.startsWith("*"))
-//				br = br.substring(2);
-//			String branchName = br.substring(0, br.indexOf('\t'));
-//			System.out.println("CurBr: '" + br + "'");
-//			System.out.println(br.substring(0, br.indexOf('\t')));
-//			System.out.println(br.substring(br.indexOf('\t')+1));
 			branchInfoMap.put(br.substring(0, br.indexOf('\t')), new BranchInfo(br.substring(0, br.indexOf('\t')), br.substring(br.indexOf('\t')+1)));
 		}
-		
-//		String arg7 = "describe";
-//		String arg8 = "--exact-match";		
+	
 
 		try {
 //			Παίρνουμε όλα τα commits ώστε να τα τοποθετήσουμε μετά ένα ένα
 			String allCommits = getAllCommitsOlderToNewer();
-//			System.out.println(allCommits);
 			BufferedReader reader = new BufferedReader(new StringReader(allCommits));
 			String contOut = null;
 			BranchInfo curBrIn = null;
 			String commit = null;
 			
 			HashMap<String, String> tagToCommitMap = new HashMap<String, String>();
-			String allTags = getAllTags();
-//			System.out.println("'"+allTags+"'");
 			for (String tag : getAllTags().split("\r\n|\r|\n")) {
 				if (tag == null || tag == "" || tag == " " || tag == "\n")
 					continue;
-				System.out.println("'"+tag+"'");
-				System.out.println("'"+getPointedCommitOfTag(tag)+"'");
-//				String tagToCom = 
+//				System.out.println("'"+tag+"'");
+//				System.out.println("'"+getPointedCommitOfTag(tag)+"'");
 				tagToCommitMap.put(getPointedCommitOfTag(tag), tag);
 			}
 			
@@ -382,35 +282,19 @@ public class Parse {
 				
 //				Pairnoume ta info tou commit gia na ta exoume se ola ta for
 				String commitFullMessage = getCommitMessageOrDateOrAuthor(commit, 0);
-				
-//				Kai ta exact tags tou commit
-/*				String[] commandArray6 = {GIT_CMD, arg7, arg8, commit};
-				ProcessBuilder pb5 = new ProcessBuilder(commandArray6);
-				pb5.directory(inputFile);
-				String curtag = IOUtils.toString(pb5.start().getInputStream(), (Charset)null);
-				if (curtag.startsWith("fatal: no tag exactly matches '" + commit + "'"))
-					curtag = null;
-*/
-				
-				
-				
-				
+								
 				for (String sbr : contOutsplit) {
 					if (sbr == null || sbr == "" || sbr == "\n" || sbr == " ")
 						continue;
-//					if (sbr.startsWith("*"))
-						sbr = sbr.substring(2);
-//					System.out.println("Branch: '" + sbr + "'");
+					sbr = sbr.substring(2);
 					curBrIn = branchInfoMap.get(sbr);
 					if (curBrIn == null)
 						continue;
-//					System.out.println("CurBranch bname: " + curBrIn == null ? "null" : curBrIn.bName);
 					
 					// Ean einai to prwto commit tis alusidas orizoume to creation date tou san creation kai tis alusidas
 						if (curBrIn.isInitial()) {																					
 							curBrIn.bDate = getCommitMessageOrDateOrAuthor(commit, 1);
 						}
-//						curBrIn.bCommits.add(new BranchCommits(commit, commitFullMessage, curtag));
 						curBrIn.bCommits.add(new BranchCommits(commit, commitFullMessage, tagToCommitMap.get(commit)));
 						
 						String curAuth = getCommitMessageOrDateOrAuthor(commit, 2);						
@@ -429,53 +313,7 @@ public class Parse {
 		
 		return branchInfoMap;		
 	}
-	
-//	private String getWorkingBranch() {
-//		String arg1 = new String("rev-parse");
-//		String arg2 = new String("--abbrev-ref"); //????To theloune i oxi?
-////		String arg3 = new String("HEAD");
-//		String arg3 = new String("HEAD");
-////		String arg4 = new String("^" + branch);
-//		String[] commandArray = {GIT_CMD, arg1, arg2, arg3};
-//		pb = new ProcessBuilder(commandArray);
-//		pb.directory(inputFile);
-//		try {
-//			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
-//			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
-//			return Integer.decode(ret).intValue();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			System.err.println("getAllCommitsOlderToNewer could not start or get stream or something!");
-//			return -1;
-//		}
-//	}
-//		
-//		git rev-parse --abbrev-ref HEAD
-//
-//	}
-	
-	
-//	private int countCommitsOfBranch(String branch) {
-//		String arg1 = new String("rev-list");
-//		String arg2 = new String("--no-merges"); //????To theloune i oxi?
-////		String arg3 = new String("HEAD");
-//		String arg3 = new String(branch + "..HEAD");
-////		String arg4 = new String("^" + branch);
-//		String[] commandArray = {GIT_CMD, arg1, arg2, arg3};
-//		pb = new ProcessBuilder(commandArray);
-//		pb.directory(inputFile);
-//		try {
-//			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
-//			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
-//			return Integer.decode(ret).intValue();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			System.err.println("getAllCommitsOlderToNewer could not start or get stream or something!");
-//			return -1;
-//		}
-//	}
 
-	
 	private int countCommitsOfBranch(String branch) {
 		String arg1 = new String("rev-list");
 		String arg2 = new String("--count"); 
@@ -483,7 +321,6 @@ public class Parse {
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
 		try {
-			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 			return Integer.decode(ret).intValue();
 		} catch (IOException e) {
@@ -502,9 +339,6 @@ public class Parse {
 		if (commitsPerAuthCount == null)
 			commitsPerAuthorCount();
 		commitsPerAuthCount.forEach((author, commitsNum)->ret.commitsPerAuthor.put(author, (double)commitsNum/(double)ret.commits));
-//		for (String author : commitesCount.keySet()) {
-//			ret.commitsPerAuthor.
-//		}
 		
 		int sumCommitsBr = 0;
 		String branches = getAllBranchesPlusLastCommit();
@@ -529,7 +363,6 @@ public class Parse {
 	private long getRepoActiveTime() {
 		String commits = getAllCommitsOlderToNewer();
 		String oldest = (commits.split("\r\n|\r|\n"))[0];
-		//Timestamp now = new Timestamp(System.currentTimeMillis());
 		long now = (long)(System.currentTimeMillis() / 1000L);
 		return now - Long.parseLong(getCommitMessageOrDateOrAuthor(oldest, 3));
 	}
