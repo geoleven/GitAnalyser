@@ -25,14 +25,15 @@ public class GitAnalyser {
 //		p.branchCount();
 		System.out.println("Main branches count: " + p.branchCount());
 		System.out.println("Main tags count: " + p.tagsCount());
-		System.out.println("Main commiters count: " + p.commitersCount());
-		for (BranchInfo bi : p.getInfoBranches().values()) {
-			System.out.println("\n\n" + bi.bName + " " + bi.bDate);
-			for (BranchCommits bc : bi.bCommits){
-				System.out.print(bc.id + " " + bc.message);
-				System.out.println(bc.tag == null ? "" : bc.tag);
-			}
-		}
+		System.out.println("Main commiters count: " + p.commitsPerAuthorCount());
+		p.getInfoBranches();
+//		for (BranchInfo bi : p.getInfoBranches().values()) {
+//			System.out.println("\n\nBranch info: '" + bi.bName + "' Date: '" + bi.bDate + "'");
+//			for (BranchCommits bc : bi.bCommits){
+//				System.out.print("Commit: " + bc.id + " Message: " + bc.message + " Tag: ");
+//				System.out.println(bc.tag == null ? "" : bc.tag);
+//			}
+//		}
 			
 		
 		System.out.println("\n\nNow exiting normally!");

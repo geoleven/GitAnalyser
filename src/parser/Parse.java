@@ -8,13 +8,18 @@ import java.io.InputStream;
 import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.Map;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 
 import base.ArgumentParser;
 
 import org.apache.commons.io.IOUtils;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 public class Parse {
 	
@@ -30,6 +35,12 @@ public class Parse {
 	private File outputFile = null;
 	private ProcessBuilder pb = null; 
 	private String filels = null;
+	private HashMap<String, Integer> commitsPerAuthCount = null;
+	private Table<String, String, Integer> commitsPerBranchPerAuthor = HashBasedTable.create();
+	private Table<String, String, Double> commitsPerBranchPerAuthorPercent = HashBasedTable.create();
+	public HashMap <String, Double> comPerDayPerAuth = null;
+	public HashMap <String, Double> comPerWeekPerAuth = null;
+	public HashMap <String, Double> comPerMonthPerAuth = null;
 	
 	public Parse(ArgumentParser ap) {	
 		this.input = ap.input;
@@ -202,10 +213,11 @@ public class Parse {
 		return tagsSplit.length;
 	}
 	
-	public int commitersCount() {
+	public int commitsPerAuthorCount() {
 		String arg1 = new String("log");
-		String arg2 = new String("--pretty=s --format=\"%an\"");
-		String[] commandArray = {GIT_CMD, arg1, arg2};
+		String arg2 = "--all";
+		String arg3 = new String("--pretty=s --format=\"%aN\"");		//Ή %an για να μην κάνει rescept το .mailmap
+		String[] commandArray = {GIT_CMD, arg1, arg2, arg3};
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
 		try {
@@ -213,16 +225,16 @@ public class Parse {
 			InputStream is = pb.start().getInputStream();
 			String commiters = IOUtils.toString(is, (Charset)null);
 			String[] commitersSplit = commiters.split("\r\n|\r|\n");
-			HashMap<String, Integer> commitesCount = new HashMap<String, Integer>();
+			commitsPerAuthCount = new HashMap<String, Integer>();
 			for (String commiter : commitersSplit) {
-				Integer temp = commitesCount.get(commiter);
+				Integer temp = commitsPerAuthCount.get(commiter);
 				if(temp != null)
-					commitesCount.put(commiter, commitesCount.get(commiter) + 1);
+					commitsPerAuthCount.put(commiter, commitsPerAuthCount.get(commiter) + 1);
 				else
-					commitesCount.put(commiter, 1);
+					commitsPerAuthCount.put(commiter, 1);
 			}
-			System.out.println("The number of commiters is: " + commitesCount.size());
-			return commitesCount.size();
+			System.out.println("The number of commiters is: " + commitsPerAuthCount.size());
+			return commitsPerAuthCount.size();
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("commitersCount could not start or get stream!");
@@ -267,17 +279,27 @@ public class Parse {
 		}
 	}
 	
-	private String getCommitMessageOrDate(String commit, int type) {
+	private String getCommitMessageOrDateOrAuthor(String commit, int type) {
 		String arg1 = "show";
 		String arg2 = "-s";
 		String arg3;
-		arg3 =  (type == 0) ? "--format=%B" : "--format=%ci";
+		//arg3 =  (type == 0) ? "--format=%B" : "--format=%ci";
+		if (type == 0)
+			arg3 = "--format=%B";
+		else if (type == 1)
+			arg3 = "--format=%ci";
+		else if (type == 2)
+			arg3 = "--format=%aN";
+		else 
+			arg3 = "--format=%ct";
 		String[] commandArray = {GIT_CMD, arg1, arg2, arg3, commit};
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
 		try {
 			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+			if (ret.endsWith("\n"))
+				ret = ret.substring(0, ret.lastIndexOf("\n"));
 			return ret;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -296,6 +318,9 @@ public class Parse {
 		try {
 			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+//			return ret.split("\n")[0];
+			if (ret.endsWith("\n"))
+				ret = ret.substring(0, ret.lastIndexOf("\n"));
 			return ret;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -324,10 +349,8 @@ public class Parse {
 			branchInfoMap.put(br.substring(0, br.indexOf('\t')), new BranchInfo(br.substring(0, br.indexOf('\t')), br.substring(br.indexOf('\t')+1)));
 		}
 		
-		
-		String arg7 = "describe";
-		String arg8 = "--exact-match";
-		
+//		String arg7 = "describe";
+//		String arg8 = "--exact-match";		
 
 		try {
 //			Παίρνουμε όλα τα commits ώστε να τα τοποθετήσουμε μετά ένα ένα
@@ -337,6 +360,19 @@ public class Parse {
 			String contOut = null;
 			BranchInfo curBrIn = null;
 			String commit = null;
+			
+			HashMap<String, String> tagToCommitMap = new HashMap<String, String>();
+			String allTags = getAllTags();
+//			System.out.println("'"+allTags+"'");
+			for (String tag : getAllTags().split("\r\n|\r|\n")) {
+				if (tag == null || tag == "" || tag == " " || tag == "\n")
+					continue;
+				System.out.println("'"+tag+"'");
+				System.out.println("'"+getPointedCommitOfTag(tag)+"'");
+//				String tagToCom = 
+				tagToCommitMap.put(getPointedCommitOfTag(tag), tag);
+			}
+			
 //			Gia kathe commit koitamai oles tis alusides stis opoies anoikei kai to topothetoume
 			while ((commit = reader.readLine()) != null) {
 				
@@ -345,7 +381,7 @@ public class Parse {
 				String[] contOutsplit = contOut.split("\r\n|\r|\n");
 				
 //				Pairnoume ta info tou commit gia na ta exoume se ola ta for
-				String commitFullMessage = getCommitMessageOrDate(commit, 0);
+				String commitFullMessage = getCommitMessageOrDateOrAuthor(commit, 0);
 				
 //				Kai ta exact tags tou commit
 /*				String[] commandArray6 = {GIT_CMD, arg7, arg8, commit};
@@ -356,21 +392,13 @@ public class Parse {
 					curtag = null;
 */
 				
-				HashMap<String, String> tagToCommitMap = new HashMap<String, String>();
-				for (String tag : getAllTags().split("\r\n|\r|\n")) {
-					if (tag == null || tag == "" || tag == " ")
-						continue;
-					tagToCommitMap.put(getPointedCommitOfTag(tag), tag);
-				}
 				
 				
 				
-				
-//				System.out.println("Commit: " + commit);
 				for (String sbr : contOutsplit) {
 					if (sbr == null || sbr == "" || sbr == "\n" || sbr == " ")
 						continue;
-					if (sbr.startsWith("*"))
+//					if (sbr.startsWith("*"))
 						sbr = sbr.substring(2);
 //					System.out.println("Branch: '" + sbr + "'");
 					curBrIn = branchInfoMap.get(sbr);
@@ -379,11 +407,18 @@ public class Parse {
 //					System.out.println("CurBranch bname: " + curBrIn == null ? "null" : curBrIn.bName);
 					
 					// Ean einai to prwto commit tis alusidas orizoume to creation date tou san creation kai tis alusidas
-						if (curBrIn.isInitial()) {
-							curBrIn.bDate = getCommitMessageOrDate(commit, 1);
+						if (curBrIn.isInitial()) {																					
+							curBrIn.bDate = getCommitMessageOrDateOrAuthor(commit, 1);
 						}
 //						curBrIn.bCommits.add(new BranchCommits(commit, commitFullMessage, curtag));
 						curBrIn.bCommits.add(new BranchCommits(commit, commitFullMessage, tagToCommitMap.get(commit)));
+						
+						String curAuth = getCommitMessageOrDateOrAuthor(commit, 2);						
+						if (commitsPerBranchPerAuthor.get(sbr, curAuth) == null) {
+							commitsPerBranchPerAuthor.put(sbr, curAuth, 1);
+						} else {
+							commitsPerBranchPerAuthor.put(sbr, curAuth, commitsPerBranchPerAuthor.get(sbr, curAuth) + 1);
+						}
 				}
 			}
 		} catch (IOException e) {
@@ -395,35 +430,121 @@ public class Parse {
 		return branchInfoMap;		
 	}
 	
+//	private String getWorkingBranch() {
+//		String arg1 = new String("rev-parse");
+//		String arg2 = new String("--abbrev-ref"); //????To theloune i oxi?
+////		String arg3 = new String("HEAD");
+//		String arg3 = new String("HEAD");
+////		String arg4 = new String("^" + branch);
+//		String[] commandArray = {GIT_CMD, arg1, arg2, arg3};
+//		pb = new ProcessBuilder(commandArray);
+//		pb.directory(inputFile);
+//		try {
+//			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+//			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+//			return Integer.decode(ret).intValue();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			System.err.println("getAllCommitsOlderToNewer could not start or get stream or something!");
+//			return -1;
+//		}
+//	}
+//		
+//		git rev-parse --abbrev-ref HEAD
+//
+//	}
 	
 	
+//	private int countCommitsOfBranch(String branch) {
+//		String arg1 = new String("rev-list");
+//		String arg2 = new String("--no-merges"); //????To theloune i oxi?
+////		String arg3 = new String("HEAD");
+//		String arg3 = new String(branch + "..HEAD");
+////		String arg4 = new String("^" + branch);
+//		String[] commandArray = {GIT_CMD, arg1, arg2, arg3};
+//		pb = new ProcessBuilder(commandArray);
+//		pb.directory(inputFile);
+//		try {
+//			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+//			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+//			return Integer.decode(ret).intValue();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			System.err.println("getAllCommitsOlderToNewer could not start or get stream or something!");
+//			return -1;
+//		}
+//	}
+
 	
-	
-	
+	private int countCommitsOfBranch(String branch) {
+		String arg1 = new String("rev-list");
+		String arg2 = new String("--count"); 
+		String[] commandArray = {GIT_CMD, arg1, arg2};
+		pb = new ProcessBuilder(commandArray);
+		pb.directory(inputFile);
+		try {
+			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+			return Integer.decode(ret).intValue();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("getAllCommitsOlderToNewer could not start or get stream or something!");
+			return -1;
+		}
+	}
+
 	
 	public PackageReturn percentages() {
-		
 		PackageReturn ret = new PackageReturn();
-//		String arg1 = new String("log");
-//		String arg2 = new String("--all");
-//		String arg3 = new String("--format=\"%H\"");
-//		String arg4 = new String("--reverse");
+		String commits = getAllCommitsOlderToNewer();
+		String[] commitsSplit = commits.split("\r\n|\r|\n");
+		ret.commits = commitsSplit.length;
+		if (commitsPerAuthCount == null)
+			commitsPerAuthorCount();
+		commitsPerAuthCount.forEach((author, commitsNum)->ret.commitsPerAuthor.put(author, (double)commitsNum/(double)ret.commits));
+//		for (String author : commitesCount.keySet()) {
+//			ret.commitsPerAuthor.
+//		}
 		
-//		String[] commandArray1 = {GIT_CMD, arg1, arg2, arg3, arg4};
-//		pb = new ProcessBuilder(commandArray1);
-//		pb.directory(inputFile);
+		int sumCommitsBr = 0;
+		String branches = getAllBranchesPlusLastCommit();
+		String[] branchesSplit = branches.split("\r\n|\r|\n");
+		for (String br : branchesSplit)
+			sumCommitsBr += countCommitsOfBranch(br.substring(0, br.indexOf('\t')));
+		for (String br : branchesSplit) {
+			String brn = br.substring(0, br.indexOf('\t'));
+			ret.commitsPerBranch.put(brn, (double)countCommitsOfBranch(brn)/(double)sumCommitsBr);
+		}
 		
-
-//			try {
-				String commits = getAllCommitsOlderToNewer();
-				String[] commitsSplit = commits.split("\r\n|\r|\n");
-				int commitsSum = commitsSplit.length;
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-		
+		for (String br : branchesSplit) {
+			String brn = br.substring(0, br.indexOf('\t'));
+			double comsOfBr = (double)countCommitsOfBranch(brn);
+			for (String auth : commitsPerBranchPerAuthor.row(brn).keySet()) {
+				commitsPerBranchPerAuthorPercent.put(brn,  auth,  (double)commitsPerBranchPerAuthor.get(brn, auth)/comsOfBr);
+			}	
+		}		
 		return ret;
 	}
 	
+	private long getRepoActiveTime() {
+		String commits = getAllCommitsOlderToNewer();
+		String oldest = (commits.split("\r\n|\r|\n"))[0];
+		//Timestamp now = new Timestamp(System.currentTimeMillis());
+		long now = (long)(System.currentTimeMillis() / 1000L);
+		return now - Long.parseLong(getCommitMessageOrDateOrAuthor(oldest, 3));
+	}
 	
+	public void comsOfAthPerTimeUnitPopulate() {
+		long repAcT = getRepoActiveTime();
+		double days = (double)repAcT / (double)86400;
+		double weeks = (double)repAcT / (double)604800;
+		double months = (double)repAcT / (double)2592000;
+		
+		for (String ath : commitsPerAuthCount.keySet()) {
+			int totalComs = commitsPerAuthCount.get(ath);
+			comPerDayPerAuth.put(ath, totalComs/days);
+			comPerWeekPerAuth.put(ath, totalComs/weeks );
+			comPerMonthPerAuth.put(ath, totalComs/months);
+		}
+	}
 }

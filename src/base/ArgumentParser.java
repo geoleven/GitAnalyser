@@ -32,18 +32,17 @@ public class ArgumentParser {
 //			System.err.println("Output already exists, please choose something else.\nNow exiting.");
 //			return false;
 //		}
-		try {
+
 			if (!outputFile.exists())
-				outputFile.createNewFile();
+				outputFile.mkdir();
 			else {
-				outputFile.delete();
-				outputFile.createNewFile();
+				if (outputFile.exists() && outputFile.isFile()) {
+					System.err.println("Output already exists as a file!");
+					return false;
+				}
+				
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.err.println("Output file could not be created");
-			return false;
-		}
+
 		return true;
 	}
 }
