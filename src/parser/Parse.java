@@ -139,13 +139,31 @@ public class Parse {
 		return linesSum;
 	}
 	
-	private String getAllBranches() {
-		String args = new String("branch");
-		String[] commandArray = {GIT_CMD, args};
+//	private String getAllBranches() {
+//		String args = new String("branch");
+//		String[] commandArray = {GIT_CMD, args};
+//		pb = new ProcessBuilder(commandArray);
+//		pb.directory(inputFile);
+//		try {
+//			String branches = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+//			return branches;
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			System.err.println("getAllBranches could not start or get stream!");
+//			return "";
+//		}
+//	}
+	
+	private String getAllBranchesPlusLastCommit() {
+		String arg1 = "for-each-ref";
+		String arg2 = "refs/heads/";
+		String arg3 = "--format=%(refname:short)%09%(objectname)";
+		String[] commandArray = {GIT_CMD, arg1, arg2, arg3};
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
 		try {
 			String branches = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+//			System.out.println("'" + branches + "'");
 			return branches;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -154,28 +172,34 @@ public class Parse {
 		}
 	}
 	
+	
 	public int branchCount() {
-		String branches = getAllBranches();
+		String branches = getAllBranchesPlusLastCommit();
 		String[] branchesSplit = branches.split("\r\n|\r|\n");
 		System.out.println("The number of branches is: " + branchesSplit.length);
 		return branchesSplit.length;
 	}
 	
-	public int tagsCount() {
+	private String getAllTags(){
 		String args = new String("tag");
 		String[] commandArray = {GIT_CMD, args};
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
 		try {
 			String tags = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
-			String[] tagsSplit = tags.split("\r\n|\r|\n");
-			System.out.println("The number of tags is: " + tagsSplit.length);
-			return tagsSplit.length;
+			return tags;
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("tagsCount could not start or get stream!");
-			return -1;
+			return null;
 		}
+	}
+	
+	public int tagsCount() {
+		String tags = getAllTags();
+		String[] tagsSplit = tags.split("\r\n|\r|\n");
+		System.out.println("The number of tags is: " + tagsSplit.length);
+		return tagsSplit.length;
 	}
 	
 	public int commitersCount() {
@@ -243,10 +267,11 @@ public class Parse {
 		}
 	}
 	
-	private String getCommitMessage(String commit) {
+	private String getCommitMessageOrDate(String commit, int type) {
 		String arg1 = "show";
 		String arg2 = "-s";
-		String arg3 = "--format=%B";
+		String arg3;
+		arg3 =  (type == 0) ? "--format=%B" : "--format=%ci";
 		String[] commandArray = {GIT_CMD, arg1, arg2, arg3, commit};
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
@@ -261,19 +286,45 @@ public class Parse {
 		}
 	}
 	
+	private String getPointedCommitOfTag(String tag) {
+		String arg1 = "rev-list";
+		String arg2 = "-n";
+		String arg3 = "1";
+		String[] commandArray = {GIT_CMD, arg1, arg2, arg3, tag};
+		pb = new ProcessBuilder(commandArray);
+		pb.directory(inputFile);
+		try {
+			//return IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+			return ret;
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("getCommitMessage could not start or get stream or something!");
+			return "";
+		}
+	}
+	
+	
+	
 	public HashMap<String, BranchInfo> getInfoBranches() {
 		HashMap<String, BranchInfo> branchInfoMap = new HashMap<String, BranchInfo>();
 			
-		String branches = getAllBranches();
+		String branches = getAllBranchesPlusLastCommit();
 		String[] branchesSplit = branches.split("\r\n|\r|\n");
 		for (String br : branchesSplit) {
-			branchInfoMap.put(br, new BranchInfo(br));
+//			if (br.startsWith("*"))
+//				branchInfoMap.put(br.substring(2), new BranchInfo(br.substring(2)));
+//			else
+//			if (br.startsWith("*"))
+//				br = br.substring(2);
+//			String branchName = br.substring(0, br.indexOf('\t'));
+//			System.out.println("CurBr: '" + br + "'");
+//			System.out.println(br.substring(0, br.indexOf('\t')));
+//			System.out.println(br.substring(br.indexOf('\t')+1));
+			branchInfoMap.put(br.substring(0, br.indexOf('\t')), new BranchInfo(br.substring(0, br.indexOf('\t')), br.substring(br.indexOf('\t')+1)));
 		}
 		
 		
-		String arg4 = new String("--reverse");
-		String arg5 = "show";
-		String arg6 = "-s";
 		String arg7 = "describe";
 		String arg8 = "--exact-match";
 		
@@ -294,29 +345,45 @@ public class Parse {
 				String[] contOutsplit = contOut.split("\r\n|\r|\n");
 				
 //				Pairnoume ta info tou commit gia na ta exoume se ola ta for
-				String commitFullMessage = getCommitMessage(commit);
+				String commitFullMessage = getCommitMessageOrDate(commit, 0);
 				
 //				Kai ta exact tags tou commit
-				String[] commandArray6 = {GIT_CMD, arg7, arg8, commit};
+/*				String[] commandArray6 = {GIT_CMD, arg7, arg8, commit};
 				ProcessBuilder pb5 = new ProcessBuilder(commandArray6);
 				pb5.directory(inputFile);
 				String curtag = IOUtils.toString(pb5.start().getInputStream(), (Charset)null);
 				if (curtag.startsWith("fatal: no tag exactly matches '" + commit + "'"))
 					curtag = null;
+*/
+				
+				HashMap<String, String> tagToCommitMap = new HashMap<String, String>();
+				for (String tag : getAllTags().split("\r\n|\r|\n")) {
+					if (tag == null || tag == "" || tag == " ")
+						continue;
+					tagToCommitMap.put(getPointedCommitOfTag(tag), tag);
+				}
 				
 				
+				
+				
+//				System.out.println("Commit: " + commit);
 				for (String sbr : contOutsplit) {
-					//Tha eprepe na kanw elegxo ab yparxei to branch alla einai poly kako gia tin taxutita
+					if (sbr == null || sbr == "" || sbr == "\n" || sbr == " ")
+						continue;
+					if (sbr.startsWith("*"))
+						sbr = sbr.substring(2);
+//					System.out.println("Branch: '" + sbr + "'");
 					curBrIn = branchInfoMap.get(sbr);
+					if (curBrIn == null)
+						continue;
+//					System.out.println("CurBranch bname: " + curBrIn == null ? "null" : curBrIn.bName);
+					
 					// Ean einai to prwto commit tis alusidas orizoume to creation date tou san creation kai tis alusidas
-					if (curBrIn.isInitial()) {
-						arg4 = "--format=%ci";
-						String[] commandArray5 = {GIT_CMD, arg5, arg6, arg4, commit};
-						ProcessBuilder pb4 = new ProcessBuilder(commandArray5);
-						pb4.directory(inputFile);
-						curBrIn.bDate = IOUtils.toString(pb4.start().getInputStream(), (Charset)null);
-					}
-					curBrIn.bCommits.add(new BranchCommits(commit, commitFullMessage, curtag));
+						if (curBrIn.isInitial()) {
+							curBrIn.bDate = getCommitMessageOrDate(commit, 1);
+						}
+//						curBrIn.bCommits.add(new BranchCommits(commit, commitFullMessage, curtag));
+						curBrIn.bCommits.add(new BranchCommits(commit, commitFullMessage, tagToCommitMap.get(commit)));
 				}
 			}
 		} catch (IOException e) {
