@@ -28,9 +28,12 @@ public class Parse {
 	private HashMap<String, Integer> commitsPerAuthCount = null;
 	private Table<String, String, Integer> commitsPerBranchPerAuthor = HashBasedTable.create();
 	private Table<String, String, Double> commitsPerBranchPerAuthorPercent = HashBasedTable.create();
-	public HashMap <String, Double> comPerDayPerAuth = null;
-	public HashMap <String, Double> comPerWeekPerAuth = null;
-	public HashMap <String, Double> comPerMonthPerAuth = null;
+	public HashMap <String, Double> comPerDayPerAuth = new HashMap <String, Double>();
+	public HashMap <String, Double> comPerWeekPerAuth = new HashMap <String, Double>();
+	public HashMap <String, Double> comPerMonthPerAuth = new HashMap <String, Double>();
+	public HashMap <String, Double> linesAddPerAuth = new HashMap <String, Double>();
+	public HashMap <String, Double> linesRemPerAuth = new HashMap <String, Double>();
+	public HashMap <String, Double> linesEdtPerAuth = new HashMap <String, Double>();
 	
 	public Parse(ArgumentParser ap) {	
 		this.input = ap.input;
@@ -317,11 +320,13 @@ public class Parse {
 	private int countCommitsOfBranch(String branch) {
 		String arg1 = new String("rev-list");
 		String arg2 = new String("--count"); 
-		String[] commandArray = {GIT_CMD, arg1, arg2};
+		String[] commandArray = {GIT_CMD, arg1, arg2, branch};
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
 		try {
 			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+			if (ret.endsWith("\n"))
+				ret = ret.substring(0, ret.lastIndexOf("\n"));
 			return Integer.decode(ret).intValue();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -379,5 +384,9 @@ public class Parse {
 			comPerWeekPerAuth.put(ath, totalComs/weeks );
 			comPerMonthPerAuth.put(ath, totalComs/months);
 		}
+	}
+	
+	public void linesPerAuthorPercentPopulate() {
+		
 	}
 }

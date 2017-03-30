@@ -34,6 +34,9 @@ public class GitAnalyser {
 //				System.out.println(bc.tag == null ? "" : bc.tag);
 //			}
 //		}
+		
+		p.percentages();
+		p.comsOfAthPerTimeUnitPopulate();
 			
 		
 		System.out.println("\n\nNow exiting normally!");
