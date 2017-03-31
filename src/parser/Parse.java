@@ -446,6 +446,11 @@ public class Parse {
 					System.out.println("Commiter " + author + " had " + entry.getValue().get(author) + "% of total commits for branch " + entry.getKey() + ".");
 				}
 			}
+			for (String author : comPerDayPerAuth.keySet()) {
+				System.out.println("Commiter " + author + " wrote " + comPerDayPerAuth.get(author) + "% of his commits each day.");
+				System.out.println("Commiter " + author + " wrote " + comPerWeekPerAuth.get(author) + "% of his commits each week.");
+				System.out.println("Commiter " + author + " wrote " + comPerMonthPerAuth.get(author) + "% of his commits each month.");
+			}
 		}
 		
 		
