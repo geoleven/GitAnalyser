@@ -77,16 +77,21 @@ public class HtmlContructor {
 	private void createBranchInfo() {
 		String result = "<table style=\"width:100%\">";
 		for (String branch : branchInfo.keySet() ) {
+			System.out.println(branch);
 			result += "<tr><td>"; 
-			result +=  "<button type=\"button\">" + branch + "</button>"; 
+			result +=  "<button type=\"button\" onclick=\"alert('Hello world!')\">" + branch + "</button>"; 
 			result += "</td></tr>";
 		}
+		result += "</table>";
+		System.out.println("\n" + result);
 	}
 	
 	public String render() {
 		createIndex();
 		String result = HEAD.concat(body1).concat(body2);
 		System.out.println(result);
+		
+		createBranchInfo();
 		return result;
 	}
 	
