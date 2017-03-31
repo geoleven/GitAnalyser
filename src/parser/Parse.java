@@ -537,15 +537,16 @@ public class Parse {
 				System.out.println("Commiter " + author + " wrote " + String.format("%f", comPerWeekPerAuth.get(author)*100) + "% of his commits each week.");
 				System.out.println("Commiter " + author + " wrote " + String.format("%f", comPerMonthPerAuth.get(author)*100) + "% of his commits each month.");
 				System.out.println("Commiter " + author + " added " + String.format("%f", linesAddPerAuthPercent.get(author)*100) + "% of lines to this repository.");
-				System.out.println("Commiter " + author + " removed " + String.format("%f", linesAddPerAuthPercent.get(author)*100) + "% of lines from this repository.");
-				System.out.println("Commiter " + author + " edited " + String.format("%f", linesAddPerAuthPercent.get(author)*100) + "% of lines of this repository.");
+				System.out.println("Commiter " + author + " removed " + String.format("%f", linesRemPerAuthPercent.get(author)*100) + "% of lines from this repository.");
+				System.out.println("Commiter " + author + " edited " + String.format("%f", linesEdtPerAuthPercent.get(author)*100) + "% of lines of this repository.");
 			}
 		}
 		
 		/*_______________________________________________________________________________________________________________________________________________________________________*/
 		
 		html = new HtmlContructor(totalFiles, totalLines, totalBranches, totalTags, totalAuthors, 
-		brancInfo, commitsPrecent, commitsPerBranchPerAuthorPercent, comPerDayPerAuth, comPerWeekPerAuth, comPerMonthPerAuth);
+		brancInfo, commitsPrecent, commitsPerBranchPerAuthorPercent, comPerDayPerAuth, comPerWeekPerAuth, 
+		comPerMonthPerAuth, linesAddPerAuthPercent, linesAddPerAuthPercent, linesAddPerAuthPercent);
 	}
 	
 	

@@ -17,9 +17,12 @@ public class HtmlContructor {
 	private HashMap <String, BranchInfo> brancInfo;
 	private PackageReturn commitsPrecent;
 	private Table<String, String, Double> commitsPerBranchPerAuthorPercent;
-	public HashMap <String, Double> comPerDayPerAuth;
-	public HashMap <String, Double> comPerWeekPerAuth;
-	public HashMap <String, Double> comPerMonthPerAuth;
+	private HashMap <String, Double> comPerDayPerAuth;
+	private HashMap <String, Double> comPerWeekPerAuth;
+	private HashMap <String, Double> comPerMonthPerAuth;
+	private HashMap <String, Double> linesAddPerAuthPercent;
+	private HashMap <String, Double> linesRemPerAuthPercent;
+	private HashMap <String, Double> linesEdtPerAuthPercent;
 	
 	private static final String HEAD = "<!DOCTYPE html>\n<html>\n<head>\n<title>Git Analyser</title>\n<head>";
 	private String body1 = new String("<body>\n");
@@ -32,7 +35,8 @@ public class HtmlContructor {
 	
 	public HtmlContructor(int totalFiles, long totalLines, int totalBranches, int totalTags, int totalAuthors, 
 			HashMap<String, BranchInfo> brancInfo, PackageReturn commitsPrecent, Table<String, String, Double> commitsPerBranchPerAuthorPercent, 
-			HashMap<String, Double> comPerDayPerAuth, HashMap<String, Double> comPerWeekPerAuth, HashMap<String, Double> comPerMonthPerAuth) {
+			HashMap<String, Double> comPerDayPerAuth, HashMap<String, Double> comPerWeekPerAuth, HashMap<String, Double> comPerMonthPerAuth, 
+			HashMap <String, Double> linesAddPerAuthPercent, HashMap <String, Double> linesRemPerAuthPercent, HashMap <String, Double> linesEdtPerAuthPercent) {
 		this.totalFiles = totalFiles;
 		this.totalLines = totalLines;
 		this.totalBranches = totalBranches;
@@ -44,6 +48,9 @@ public class HtmlContructor {
 		this.comPerDayPerAuth = comPerDayPerAuth;
 		this.comPerWeekPerAuth = comPerWeekPerAuth;
 		this.comPerMonthPerAuth = comPerMonthPerAuth;
+		this.linesAddPerAuthPercent = linesAddPerAuthPercent;
+		this.linesRemPerAuthPercent = linesRemPerAuthPercent;
+		this.linesEdtPerAuthPercent = linesEdtPerAuthPercent;
 	}
 	
 	private void createIndex() {
