@@ -19,7 +19,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 public class Parse {	
-	private static final String GIT_CMD = "git";
+	private static final String GIT_CMD = "C:\\Program Files\\Git\\bin\\git";
 	
 	private String input = null;
 //	private String output = null;
@@ -195,6 +195,11 @@ public class Parse {
 		pb.directory(inputFile);
 		try {
 			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+			if (ret.endsWith("\n"))
+				ret = ret.substring(0, ret.lastIndexOf("\n"));
+//				ret = ret.substring(0, ret.length()-2);
+			if (ret.endsWith("\r\n"))
+				ret = ret.substring(0, ret.lastIndexOf("\r\n"));
 			return ret;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -291,8 +296,9 @@ public class Parse {
 				String commitFullMessage = getCommitMessageOrDateOrAuthor(commit, 0);
 								
 				for (String sbr : contOutsplit) {
-					if (sbr == null || sbr == "" || sbr == "\n" || sbr == " ")
+					if (sbr == null || sbr.equals("") || sbr.equals("\n") || sbr.equals(" ") || sbr.equals("\r") || sbr.equals("\r\n"))
 						continue;
+//					System.out.println("'"+sbr+"'");
 					sbr = sbr.substring(2);
 					curBrIn = branchInfoMap.get(sbr);
 					if (curBrIn == null)
@@ -389,9 +395,13 @@ public class Parse {
 		for (String ath : commitsPerAuthCount.keySet()) {
 			int totalComs = commitsPerAuthCount.get(ath);
 //			System.out.println(totalComs);
-			comPerDayPerAuth.put(ath, totalComs/days);
-			comPerWeekPerAuth.put(ath, totalComs/weeks );
-			comPerMonthPerAuth.put(ath, totalComs/months);
+//			comPerDayPerAuth.put(ath, (totalComs/Math.ceil(days))/totalComs);
+//			comPerWeekPerAuth.put(ath, (totalComs/Math.ceil(weeks))/totalComs );
+//			comPerMonthPerAuth.put(ath, (totalComs/Math.ceil(months))/totalComs);
+			comPerDayPerAuth.put(ath, (totalComs/Math.ceil(days)));
+			comPerWeekPerAuth.put(ath, (totalComs/Math.ceil(weeks)));
+			comPerMonthPerAuth.put(ath, (totalComs/Math.ceil(months)));
+			// TODO is this mathematically correct?
 		}
 	}
 	
@@ -538,9 +548,9 @@ public class Parse {
 				}
 			}
 			for (String author : comPerDayPerAuth.keySet()) {
-				System.out.println("Commiter " + author + " wrote " + String.format("%f", comPerDayPerAuth.get(author)*100) + "% of his commits each day.");
-				System.out.println("Commiter " + author + " wrote " + String.format("%f", comPerWeekPerAuth.get(author)*100) + "% of his commits each week.");
-				System.out.println("Commiter " + author + " wrote " + String.format("%f", comPerMonthPerAuth.get(author)*100) + "% of his commits each month.");
+				System.out.println("Commiter " + author + " writes " + String.format("%f", comPerDayPerAuth.get(author)*100) + "% commits per day.");
+				System.out.println("Commiter " + author + " writes " + String.format("%f", comPerWeekPerAuth.get(author)*100) + "% commits per week.");
+				System.out.println("Commiter " + author + " writes " + String.format("%f", comPerMonthPerAuth.get(author)*100) + "% commits per month.");
 				System.out.println("Commiter " + author + " added " + String.format("%f", linesAddPerAuthPercent.get(author)*100) + "% of lines to this repository.");
 				System.out.println("Commiter " + author + " removed " + String.format("%f", linesRemPerAuthPercent.get(author)*100) + "% of lines from this repository.");
 				System.out.println("Commiter " + author + " edited " + String.format("%f", linesEdtPerAuthPercent.get(author)*100) + "% of lines of this repository.");

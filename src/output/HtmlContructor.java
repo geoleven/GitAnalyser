@@ -14,7 +14,7 @@ public class HtmlContructor {
 	private int totalBranches;
 	private int totalTags;
 	private int totalAuthors;
-	private HashMap <String, BranchInfo> brancInfo;
+	private HashMap <String, BranchInfo> branchInfo;
 	private PackageReturn commitsPrecent;
 	private Table<String, String, Double> commitsPerBranchPerAuthorPercent;
 	private HashMap <String, Double> comPerDayPerAuth;
@@ -24,7 +24,7 @@ public class HtmlContructor {
 	private HashMap <String, Double> linesRemPerAuthPercent;
 	private HashMap <String, Double> linesEdtPerAuthPercent;
 	
-	private static final String HEAD = "<!DOCTYPE html>\n<html>\n<head>\n<title>Git Analyser</title>\n<head>";
+	private static final String HEAD = "<!DOCTYPE html>\n<html>\n<head>\n<title>Git Analyser</title>\n</head>";
 	private String body1 = new String("<body>\n");
 	private String body2 = new String("</body>\n</html>");
 	
@@ -34,7 +34,7 @@ public class HtmlContructor {
 	
 	
 	public HtmlContructor(int totalFiles, long totalLines, int totalBranches, int totalTags, int totalAuthors, 
-			HashMap<String, BranchInfo> brancInfo, PackageReturn commitsPrecent, Table<String, String, Double> commitsPerBranchPerAuthorPercent, 
+			HashMap<String, BranchInfo> branchInfo, PackageReturn commitsPrecent, Table<String, String, Double> commitsPerBranchPerAuthorPercent, 
 			HashMap<String, Double> comPerDayPerAuth, HashMap<String, Double> comPerWeekPerAuth, HashMap<String, Double> comPerMonthPerAuth, 
 			HashMap <String, Double> linesAddPerAuthPercent, HashMap <String, Double> linesRemPerAuthPercent, HashMap <String, Double> linesEdtPerAuthPercent) {
 		this.totalFiles = totalFiles;
@@ -42,7 +42,7 @@ public class HtmlContructor {
 		this.totalBranches = totalBranches;
 		this.totalTags = totalTags;
 		this.totalAuthors = totalAuthors;
-		this.brancInfo = brancInfo;
+		this.branchInfo = branchInfo;
 		this.commitsPrecent = commitsPrecent;
 		this.commitsPerBranchPerAuthorPercent = commitsPerBranchPerAuthorPercent;
 		this.comPerDayPerAuth = comPerDayPerAuth;
@@ -54,10 +54,37 @@ public class HtmlContructor {
 	}
 	
 	private void createIndex() {
-		
+		body1 = body1.concat("<table style=\"width:100%\">"
+				+ "<tr>" 
+				+ "<td>" + "Total Files: " + "</td>"
+				+ "<td>" + totalFiles + "</td>"
+				+ "</tr>" + "<tr>"
+				+ "<td>" + "Total Lines: " + "</td>"
+				+ "<td>" + totalLines + "</td>"
+				+ "</tr>" + "</tr>"
+				+ "<td>" + "Total Branches: " + "</td>"
+				+ "<td>" + totalBranches + "</td>"
+				+ "</tr>" + "</tr>"
+				+ "<td>" + "Total Tags: " + "</td>"
+				+ "<td>" + totalTags + "</td>"
+				+ "</tr>" + "</tr>"
+				+ "<td>" + "Total Authors: " + "</td>"
+				+ "<td>" + totalAuthors + "</td>"
+				+ "</tr>" + "</tr>"
+				+ "</table");
+	}
+	
+	private void createBranchInfo() {
+		String result = "<table style=\"width:100%\">";
+		for (String branch : branchInfo.keySet() ) {
+			result += "<tr><td>"; 
+			result +=  "<button type=\"button\">" + branch + "</button>"; 
+			result += "</td></tr>";
+		}
 	}
 	
 	public String render() {
+		createIndex();
 		String result = HEAD.concat(body1).concat(body2);
 		System.out.println(result);
 		return result;
