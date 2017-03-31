@@ -11,6 +11,7 @@ import java.util.Map;
 import java.io.BufferedReader;
 
 import base.ArgumentParser;
+import output.HtmlContructor;
 
 import org.apache.commons.io.IOUtils;
 
@@ -32,9 +33,16 @@ public class Parse {
 	public HashMap <String, Double> comPerDayPerAuth = new HashMap <String, Double>();
 	public HashMap <String, Double> comPerWeekPerAuth = new HashMap <String, Double>();
 	public HashMap <String, Double> comPerMonthPerAuth = new HashMap <String, Double>();
-	public HashMap <String, Double> linesAddPerAuth = new HashMap <String, Double>();
-	public HashMap <String, Double> linesRemPerAuth = new HashMap <String, Double>();
-	public HashMap <String, Double> linesEdtPerAuth = new HashMap <String, Double>();
+	public HashMap <String, Long> linesAddPerAuth = new HashMap <String, Long>();
+	public HashMap <String, Long> linesRemPerAuth = new HashMap <String, Long>();
+	public HashMap <String, Long> linesEdtPerAuth = new HashMap <String, Long>();
+	private long totalAdds = 0;
+	private long totalSubs = 0;
+	private long totalEdts = 0;
+	public HashMap <String, Double> linesAddPerAuthPercent = new HashMap <String, Double>();
+	public HashMap <String, Double> linesRemPerAuthPercent = new HashMap <String, Double>();
+	public HashMap <String, Double> linesEdtPerAuthPercent = new HashMap <String, Double>();
+	public HtmlContructor html = null;
 	
 	public Parse(ArgumentParser ap) {	
 		this.input = ap.input;
@@ -382,14 +390,89 @@ public class Parse {
 		}
 	}
 	
-	public void linesPerAuthorPercentPopulate() {
+	private String getAuthorChanges(String author) {
+		String arg1 = "log";
+		String arg2 = "--author=" + author;
+		String arg3 = "--pretty=tformat:";
+		String arg4 = "--numstat";
+		String[] commandArray = {GIT_CMD, arg1, arg2, arg3, arg4};
+		pb = new ProcessBuilder(commandArray);
+		pb.directory(inputFile);
+		try {
+			String ret = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
+			if (ret.endsWith("\n"))
+				ret = ret.substring(0, ret.lastIndexOf("\n"));
+			return ret;
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("getAuthorChanges could not start or get stream or something!");
+			return "";
+		}
+	}
+	
+	public void calculateChanges(String author, String line) {
+
+		String[] parts = line.split("\t");
+		
+//		System.out.println(line);
+//		System.out.println(parts[0]);
+//		System.out.println(parts[1]);
+		
+		if (parts[0].startsWith("-"))
+			return;
+		
+		long adds = Long.parseLong(parts[0]);
+		long subs = Long.parseLong(parts[1]);
+		
+//		System.out.println(adds);
+//		System.out.println(subs);
+		
+		if (adds > subs) {
+			linesAddPerAuth.put(author, adds-subs + (linesAddPerAuth.get(author)));
+			totalAdds += adds-subs;
+			linesEdtPerAuth.put(author, subs + (linesEdtPerAuth.get(author)));
+			totalEdts += subs;
+		}
+		else if (adds < subs) {
+			linesRemPerAuth.put(author, subs-adds + (linesRemPerAuth.get(author)));
+			totalSubs += subs-adds;
+			linesEdtPerAuth.put(author, adds + (linesEdtPerAuth.get(author)));
+			totalEdts += adds;
+		}
+		else if (adds != (long)0) {
+			linesEdtPerAuth.put(author, adds + (linesEdtPerAuth.get(author)));
+			totalEdts += adds;
+		}
+		
 		
 	}
 	
+	public void linesPerAuthorPercentPopulate() {
+		for (String author : commitsPerAuthCount.keySet()) {
+			linesAddPerAuth.put(author, (long)0);
+			linesRemPerAuth.put(author, (long)0);
+			linesEdtPerAuth.put(author, (long)0);
+			String allChanges = getAuthorChanges(author);
+			BufferedReader reader = new BufferedReader(new StringReader(allChanges));
+			String line;
+			try {
+				while ((line = reader.readLine()) != null) 
+					calculateChanges(author, line);
+			} catch (IOException e) {
+				System.out.println("readLine faield in linesPerAuthorPercentPopulate");
+				e.printStackTrace();
+			}
+		}
+		for (String author : commitsPerAuthCount.keySet()) {
+			linesAddPerAuthPercent.put(author, (double) linesAddPerAuth.get(author) / (double) totalAdds);
+			linesRemPerAuthPercent.put(author, (double) linesRemPerAuth.get(author) / (double) totalSubs);
+			linesEdtPerAuthPercent.put(author, (double) linesEdtPerAuth.get(author) / (double) totalEdts);
+		}
+	}
 	
-	public void run() {
+	
+	public void run(boolean verbose, boolean render) {
 		System.out.println("Now running, please wait . . .");
-		boolean verbose = true;
 		
 		if (verbose)
 			System.out.println("Counting files . . .");
@@ -416,6 +499,9 @@ public class Parse {
 			System.out.println("Done.\nCollecting commiters' info . . .");
 		comsOfAthPerTimeUnitPopulate();
 		if (verbose)
+			System.out.println("Done.\nCollecting commiters' line editing info . . .");
+		linesPerAuthorPercentPopulate();
+		if (verbose)
 			System.out.println("Done.");
 		
 		if (verbose) {
@@ -438,22 +524,29 @@ public class Parse {
 			
 			System.out.println("Main commits count: " + commitsPrecent.commits);
 			commitsPrecent.commitsPerAuthor.forEach((author, percent)->
-			System.out.println("Commiter " + author + " made " + percent + "% of total commits."));
+			System.out.println("Commiter " + author + " made " + String.format("%f", percent*100) + "% of total commits."));
 			commitsPrecent.commitsPerBranch.forEach((branch, percent)->
-			System.out.println("Branch " + branch + " had " + percent + "% of total commits."));
+			System.out.println("Branch " + branch + " had " + String.format("%f", percent*100) + "% of total commits."));
 			for (Map.Entry<String, Map<String, Double>> entry : commitsPerBranchPerAuthorPercent.rowMap().entrySet() ) {
 				for (String author : entry.getValue().keySet()) {
-					System.out.println("Commiter " + author + " had " + entry.getValue().get(author) + "% of total commits for branch " + entry.getKey() + ".");
+					System.out.println("Commiter " + author + " had " + String.format("%f", entry.getValue().get(author)*100) + "% of total commits for branch " + entry.getKey() + ".");
 				}
 			}
 			for (String author : comPerDayPerAuth.keySet()) {
-				System.out.println("Commiter " + author + " wrote " + comPerDayPerAuth.get(author) + "% of his commits each day.");
-				System.out.println("Commiter " + author + " wrote " + comPerWeekPerAuth.get(author) + "% of his commits each week.");
-				System.out.println("Commiter " + author + " wrote " + comPerMonthPerAuth.get(author) + "% of his commits each month.");
+				System.out.println("Commiter " + author + " wrote " + String.format("%f", comPerDayPerAuth.get(author)*100) + "% of his commits each day.");
+				System.out.println("Commiter " + author + " wrote " + String.format("%f", comPerWeekPerAuth.get(author)*100) + "% of his commits each week.");
+				System.out.println("Commiter " + author + " wrote " + String.format("%f", comPerMonthPerAuth.get(author)*100) + "% of his commits each month.");
+				System.out.println("Commiter " + author + " added " + String.format("%f", linesAddPerAuthPercent.get(author)*100) + "% of lines to this repository.");
+				System.out.println("Commiter " + author + " removed " + String.format("%f", linesAddPerAuthPercent.get(author)*100) + "% of lines from this repository.");
+				System.out.println("Commiter " + author + " edited " + String.format("%f", linesAddPerAuthPercent.get(author)*100) + "% of lines of this repository.");
 			}
 		}
 		
+		/*_______________________________________________________________________________________________________________________________________________________________________*/
 		
+		html = new HtmlContructor(totalFiles, totalLines, totalBranches, totalTags, totalAuthors, 
+		brancInfo, commitsPrecent, commitsPerBranchPerAuthorPercent, comPerDayPerAuth, comPerWeekPerAuth, comPerMonthPerAuth);
 	}
+	
 	
 }

@@ -12,7 +12,9 @@ public class GitAnalyser {
 			return;
 		
 		p = new Parse(arguments);
-		p.run();
+		p.run(true, true);
+		
+		p.html.render();
 		
 		System.out.println("\n\nNow exiting normally!");
 		
