@@ -382,8 +382,13 @@ public class Parse {
 		double weeks = (double)repAcT / (double)604800;
 		double months = (double)repAcT / (double)2592000;
 		
+//		System.out.println(days);
+//		System.out.println(weeks);
+//		System.out.println(months);
+		
 		for (String ath : commitsPerAuthCount.keySet()) {
 			int totalComs = commitsPerAuthCount.get(ath);
+//			System.out.println(totalComs);
 			comPerDayPerAuth.put(ath, totalComs/days);
 			comPerWeekPerAuth.put(ath, totalComs/weeks );
 			comPerMonthPerAuth.put(ath, totalComs/months);
@@ -544,9 +549,11 @@ public class Parse {
 		
 		/*_______________________________________________________________________________________________________________________________________________________________________*/
 		
-		html = new HtmlContructor(totalFiles, totalLines, totalBranches, totalTags, totalAuthors, 
-		brancInfo, commitsPrecent, commitsPerBranchPerAuthorPercent, comPerDayPerAuth, comPerWeekPerAuth, 
-		comPerMonthPerAuth, linesAddPerAuthPercent, linesAddPerAuthPercent, linesAddPerAuthPercent);
+		if (render) {
+			html = new HtmlContructor(totalFiles, totalLines, totalBranches, totalTags, totalAuthors, 
+			brancInfo, commitsPrecent, commitsPerBranchPerAuthorPercent, comPerDayPerAuth, comPerWeekPerAuth, 
+			comPerMonthPerAuth, linesAddPerAuthPercent, linesAddPerAuthPercent, linesAddPerAuthPercent);
+		}
 	}
 	
 	
