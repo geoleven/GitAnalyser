@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Map;
 import java.io.BufferedReader;
 
 import base.ArgumentParser;
@@ -43,8 +44,8 @@ public class Parse {
 	}
 
 //	3rd try XD
-	private static int countLines(String filename) {
-		int lines = 0;
+	private static long countLines(String filename) {
+		long lines = 0;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(filename));
 			while (reader.readLine() != null) 
@@ -66,8 +67,6 @@ public class Parse {
 		try {
 			filels = IOUtils.toString(pb.start().getInputStream(), (Charset)null);
 			String[] filelsSplit = filels.split("\r\n|\r|\n");
-			//System.out.println(filels);
-			System.out.println("The number of files is: " + filelsSplit.length);
 			return filelsSplit.length;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -76,15 +75,14 @@ public class Parse {
 		}
 	}
 	
-	public int totalLinesCount() {
+	public long totalLinesCount() {
 		if (filels == null)
 			if (filesCount() == -1)
 				return -1;
 		String[] filelsSplit = filels.split("\r\n|\r|\n");
-		int linesSum = 0;
+		long linesSum = 0;
 		for (String singleFile : filelsSplit)
 			linesSum += countLines(input + singleFile);
-		System.out.println("The total number of lines is: " + linesSum);
 		return linesSum;
 	}
 	
@@ -109,7 +107,6 @@ public class Parse {
 	public int branchCount() {
 		String branches = getAllBranchesPlusLastCommit();
 		String[] branchesSplit = branches.split("\r\n|\r|\n");
-		System.out.println("The number of branches is: " + branchesSplit.length);
 		return branchesSplit.length;
 	}
 	
@@ -131,15 +128,15 @@ public class Parse {
 	public int tagsCount() {
 		String tags = getAllTags();
 		String[] tagsSplit = tags.split("\r\n|\r|\n");
-		System.out.println("The number of tags is: " + tagsSplit.length);
 		return tagsSplit.length;
 	}
 	
 	public int commitsPerAuthorCount() {
-		String arg1 = new String("log");
+		String arg1 = "log";
 		String arg2 = "--all";
-		String arg3 = new String("--pretty=s --format=\"%aN\"");		//Ή %an για να μην κάνει rescept το .mailmap
-		String[] commandArray = {GIT_CMD, arg1, arg2, arg3};
+		String arg3 = "--pretty=s";
+		String arg4 = "--format=%aN";		//Ή %an για να μην κάνει rescept το .mailmap
+		String[] commandArray = {GIT_CMD, arg1, arg2, arg3, arg4};
 		pb = new ProcessBuilder(commandArray);
 		pb.directory(inputFile);
 		try {
@@ -155,7 +152,6 @@ public class Parse {
 				else
 					commitsPerAuthCount.put(commiter, 1);
 			}
-			System.out.println("The number of commiters is: " + commitsPerAuthCount.size());
 			return commitsPerAuthCount.size();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -168,7 +164,7 @@ public class Parse {
 	private String getAllCommitsOlderToNewer() {
 		String arg1 = new String("log");
 		String arg2 = new String("--all");
-		String arg3 = new String("--format=\"%H\"");
+		String arg3 = new String("--format=%H");
 		String arg4 = new String("--reverse");
 		String[] commandArray = {GIT_CMD, arg1, arg2, arg3, arg4};
 		pb = new ProcessBuilder(commandArray);
@@ -389,4 +385,70 @@ public class Parse {
 	public void linesPerAuthorPercentPopulate() {
 		
 	}
+	
+	
+	public void run() {
+		System.out.println("Now running, please wait . . .");
+		boolean verbose = true;
+		
+		if (verbose)
+			System.out.println("Counting files . . .");
+		int totalFiles = filesCount();
+		if (verbose)
+			System.out.println("Done.\nCounting lines . . .");
+		long totalLines = totalLinesCount();
+		if (verbose)
+			System.out.println("Done.\nCounting branches . . .");
+		int totalBranches = branchCount();
+		if (verbose)
+			System.out.println("Done.\nCounting tags . . .");
+		int totalTags = tagsCount();
+		if (verbose)
+			System.out.println("Done.\nCounting commiters . . .");
+		int totalAuthors = commitsPerAuthorCount();
+		if (verbose)
+			System.out.println("Done.\nCollecting branches' info . . .");
+		HashMap<String, BranchInfo> brancInfo = getInfoBranches();
+		if (verbose)
+			System.out.println("Done.\nCollecting commits' info . . .");
+		PackageReturn commitsPrecent = percentages();
+		if (verbose)
+			System.out.println("Done.\nCollecting commiters' info . . .");
+		comsOfAthPerTimeUnitPopulate();
+		if (verbose)
+			System.out.println("Done.");
+		
+		if (verbose) {
+			System.out.println("");
+			System.out.println("Main files count: " + totalFiles);
+			System.out.println("Main total lines count: " + totalLines);
+			System.out.println("Main branches count: " + totalBranches);
+			System.out.println("Main tags count: " + totalTags);
+			System.out.println("Main commiters count: " + totalAuthors);
+		
+		
+			for (BranchInfo bi : brancInfo.values()) {
+				System.out.println("\n\n\nBranch info: '" + bi.bName + "' Date: '" + bi.bDate +
+						"'\n_______________________________________________________________________");
+				for (BranchCommits bc : bi.bCommits){
+					System.out.print("Commit: " + bc.id + "\nMessage:" + bc.message + "\nTag: ");
+					System.out.println(bc.tag == null ? "None" : bc.tag);
+				}
+			}
+			
+			System.out.println("Main commits count: " + commitsPrecent.commits);
+			commitsPrecent.commitsPerAuthor.forEach((author, percent)->
+			System.out.println("Commiter " + author + " made " + percent + "% of total commits."));
+			commitsPrecent.commitsPerBranch.forEach((branch, percent)->
+			System.out.println("Branch " + branch + " had " + percent + "% of total commits."));
+			for (Map.Entry<String, Map<String, Double>> entry : commitsPerBranchPerAuthorPercent.rowMap().entrySet() ) {
+				for (String author : entry.getValue().keySet()) {
+					System.out.println("Commiter " + author + " had " + entry.getValue().get(author) + "% of total commits for branch " + entry.getKey() + ".");
+				}
+			}
+		}
+		
+		
+	}
+	
 }
