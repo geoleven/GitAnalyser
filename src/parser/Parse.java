@@ -256,8 +256,6 @@ public class Parse {
 		}
 	}
 	
-	
-	
 	public HashMap<String, BranchInfo> getInfoBranches() {
 		HashMap<String, BranchInfo> branchInfoMap = new HashMap<String, BranchInfo>();
 			
