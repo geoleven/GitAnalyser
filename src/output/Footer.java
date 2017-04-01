@@ -52,8 +52,6 @@ public class Footer {
 			"    <!-- ENDS poshytip -->\n" + 
 			"    <script src=\"js/backstretch.js\"></script>\n" + 
 			"    <script src=\"js/custom.js\"></script>\n" + 
-//			"    <script src=\"js/popup/dist/jquery.fullscreen-popup.js\"></script>\n" + 
-//			"    <script> $(\".open-popup\").fullScreenPopup(); </script>\n" + 
 			"    <!-- ENDS JS -->\n" + 
 			"</body>\n" + 
 			"\n" + 

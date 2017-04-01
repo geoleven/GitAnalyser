@@ -269,7 +269,6 @@ public class Parse {
 			branchInfoMap.put(br.substring(0, br.indexOf('\t')), new BranchInfo(br.substring(0, br.indexOf('\t')), bLastEdit.substring(0, bLastEdit.length()-6)));
 		}
 	
-
 		try {
 //			Παίρνουμε όλα τα commits ώστε να τα τοποθετήσουμε μετά ένα ένα
 			String allCommits = getAllCommitsOlderToNewer();
@@ -282,8 +281,6 @@ public class Parse {
 			for (String tag : getAllTags().split("\r\n|\r|\n")) {
 				if (tag == null || tag.equals("") || tag.equals(" ") || tag.equals("\n"))
 					continue;
-//				System.out.println("'"+tag+"'");
-//				System.out.println("'"+getPointedCommitOfTag(tag)+"'");
 				tagToCommitMap.put(getPointedCommitOfTag(tag), tag);
 			}
 			
@@ -300,7 +297,6 @@ public class Parse {
 				for (String sbr : contOutsplit) {
 					if (sbr == null || sbr.equals("") || sbr.equals("\n") || sbr.equals(" ") || sbr.equals("\r") || sbr.equals("\r\n"))
 						continue;
-//					System.out.println("'"+sbr+"'");
 					sbr = sbr.substring(2);
 					curBrIn = branchInfoMap.get(sbr);
 					if (curBrIn == null)
@@ -393,10 +389,6 @@ public class Parse {
 		double weeks = (double)repAcT / (double)604800;
 		double months = (double)repAcT / (double)2592000;
 		
-//		System.out.println(days);
-//		System.out.println(weeks);
-//		System.out.println(months);
-		
 		for (String ath : commitsPerAuthCount.keySet()) {
 			int totalComs = commitsPerAuthCount.get(ath);
 //			System.out.println(totalComs);
@@ -434,18 +426,11 @@ public class Parse {
 
 		String[] parts = line.split("\t");
 		
-//		System.out.println(line);
-//		System.out.println(parts[0]);
-//		System.out.println(parts[1]);
-		
 		if (parts[0].startsWith("-"))
 			return;
 		
 		long adds = Long.parseLong(parts[0]);
 		long subs = Long.parseLong(parts[1]);
-		
-//		System.out.println(adds);
-//		System.out.println(subs);
 		
 		if (adds > subs) {
 			linesAddPerAuth.put(author, adds-subs + (linesAddPerAuth.get(author)));
@@ -463,8 +448,6 @@ public class Parse {
 			linesEdtPerAuth.put(author, adds + (linesEdtPerAuth.get(author)));
 			totalEdts += adds;
 		}
-		
-		
 	}
 	
 	public void linesPerAuthorPercentPopulate() {
