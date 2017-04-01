@@ -22,7 +22,7 @@ public class HtmlContructor {
 	private int totalTags;
 	private int totalAuthors;
 	private HashMap <String, BranchInfo> branchInfo;
-	private PackageReturn commitsPrecent;
+	private PackageReturn commitsPercent;
 	private Table<String, String, Double> commitsPerBranchPerAuthorPercent;
 	private HashMap <String, Double> comPerDayPerAuth;
 	private HashMap <String, Double> comPerWeekPerAuth;
@@ -41,7 +41,7 @@ public class HtmlContructor {
 	
 	
 	public HtmlContructor(String output, File outputFile, int totalFiles, long totalLines, int totalBranches, int totalTags, int totalAuthors, 
-			HashMap<String, BranchInfo> branchInfo, PackageReturn commitsPrecent, Table<String, String, Double> commitsPerBranchPerAuthorPercent, 
+			HashMap<String, BranchInfo> branchInfo, PackageReturn commitsPercent, Table<String, String, Double> commitsPerBranchPerAuthorPercent, 
 			HashMap<String, Double> comPerDayPerAuth, HashMap<String, Double> comPerWeekPerAuth, HashMap<String, Double> comPerMonthPerAuth, 
 			HashMap <String, Double> linesAddPerAuthPercent, HashMap <String, Double> linesRemPerAuthPercent, HashMap <String, Double> linesEdtPerAuthPercent) {
 		this.output = output;
@@ -52,7 +52,7 @@ public class HtmlContructor {
 		this.totalTags = totalTags;
 		this.totalAuthors = totalAuthors;
 		this.branchInfo = branchInfo;
-		this.commitsPrecent = commitsPrecent;
+		this.commitsPercent = commitsPercent;
 		this.commitsPerBranchPerAuthorPercent = commitsPerBranchPerAuthorPercent;
 		this.comPerDayPerAuth = comPerDayPerAuth;
 		this.comPerWeekPerAuth = comPerWeekPerAuth;
@@ -70,6 +70,10 @@ public class HtmlContructor {
 		return BranchesBody.getBody(branchInfo);
 	}
 	
+	private String getCommitsBody() {
+		return CommitsBody.getBody(commitsPercent, commitsPerBranchPerAuthorPercent);
+	}
+	
 	private void copyRescources() {
 		File sourceFiles = new File("./webfiles/");
 		try {
@@ -84,9 +88,11 @@ public class HtmlContructor {
 		copyRescources();
 		String index = HEAD + MENU + getIndexBody() + FOOTER;
 		String branches = HEAD + MENU + getBranchesBody() + FOOTER;
+		String commits = HEAD + MENU + getCommitsBody() + FOOTER;
 			try {
 				FileUtils.writeStringToFile(new File(output + ((output.endsWith("/") || output.endsWith("\\")) ? "index.html" : "/index.html")) , index, (Charset)null);
 				FileUtils.writeStringToFile(new File(output + ((output.endsWith("/") || output.endsWith("\\")) ? "branches.html" : "/branches.html")) , branches, (Charset)null);
+				FileUtils.writeStringToFile(new File(output + ((output.endsWith("/") || output.endsWith("\\")) ? "commits.html" : "/commits.html")) , commits, (Charset)null);
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.err.println("Could not write index.html!");

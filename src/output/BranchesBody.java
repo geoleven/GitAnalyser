@@ -8,13 +8,7 @@ import parser.BranchInfo;
 public class BranchesBody {
 	public static String getBody(HashMap <String, BranchInfo> branchInfo) {			
 		
-		String up = "		\r\n" + 
-//				"		<!-- Branch buttons -->\r\n" + 
-//				"		<ul id=\"image-buttons\">\r\n" + 
-//				"			<li id=\"close-image\" class=\"poshytip\" title=\"Close Branch\" ></li>\r\n" + 
-//				"			<li id=\"info-button\" class=\"poshytip\" title=\"Branch info\"></li>\r\n" + 
-//				"		</ul>\r\n" + 
-//				"		<!-- ENDS Branch buttons -->\r\n" + 
+		String up = "		\n" +  
 				"		" + 
 				"\n<!-- Page wrap -->\n" + 
 				"    <div id=\"page-wrap\">\n" + 
@@ -33,7 +27,6 @@ public class BranchesBody {
 				"                            <td>" + branch + "</td>\n" + 
 				"                            <td>" + branchInfo.get(branch).bDate + "</td>\n" + 
 				"                            <td>" + branchInfo.get(branch).bLastEdit + "</td>\n" + 
-//				"                            <td> <button class=\"open-popup\" data-popup=\"#branch" + String.valueOf(counter) + "\">More info...</button></td>\n" + 
 //				"                            <td> <button onclick=\"openNav('" + String.valueOf(counter) + "')\">More info...</button></td>\n" + 
 				"                        </tr>\n";
 		++counter;
@@ -49,50 +42,50 @@ public class BranchesBody {
 		
 		counter = 0;
 		for (String branch : branchInfo.keySet()) {
-			down += "        <div id=\"branch" + String.valueOf(counter) + "\" class=\"overlay\" onclick=\"closeNav('branch" + String.valueOf(counter) + "')\">\r\n" + 
+			down += "        <div id=\"branch" + String.valueOf(counter) + "\" class=\"overlay\" onclick=\"closeNav('branch" + String.valueOf(counter) + "')\">\n" + 
 					"        <a href=\"javascript:void(0)\" class=\"closebtn\" onclick=\"closeNav('branch" + String.valueOf(counter) + "')\">&times;</a>\n" + 
-					"            <div class=\"overlay-content\">\r\n" + 
-					"                <div class=\"datagrid\">\r\n" + 
-					"                    <table>\r\n" + 
-					"                        <tbody>\r\n" + 
+					"            <div class=\"overlay-content\">\n" + 
+					"                <div class=\"datagrid\">\n" + 
+					"                    <table>\n" + 
+					"                        <tbody>\n" + 
 					"                            ";
 	
 			for (BranchCommits brcm : branchInfo.get(branch).bCommits) {
-				down += "\r\n" + 
-						"                            <tr>\r\n" + 
-						"                                <td>" +  brcm.id + "</td>\r\n" + 
-						"                                <td>\r\n" + 
-						"                                    <div style=\" max-height: 60px;\">\r\n" + 
-						"                                        " + brcm.message + "\r\n" + 
-						"                                    </div>\r\n" + 
-						"                                </td>\r\n" + 
-						"                                <td>" + brcm.date + "</td>\r\n" + 
-						"                                <td>" + brcm.author + "</td>\r\n" + 
-						"                                <td>" + ((brcm.tag == null) ? "" : brcm.tag) + "</td>\r\n" + 
-						"                            </tr>\r\n" + 
+				down += "\n" + 
+						"                            <tr>\n" + 
+						"                                <td>" +  brcm.id + "</td>\n" + 
+						"                                <td>\n" + 
+						"                                    <div style=\" max-height: 60px;\">\n" + 
+						"                                        " + brcm.message + "\n" + 
+						"                                    </div>\n" + 
+						"                                </td>\n" + 
+						"                                <td>" + brcm.date + "</td>\n" + 
+						"                                <td>" + brcm.author + "</td>\n" + 
+						"                                <td>" + ((brcm.tag == null) ? "" : brcm.tag) + "</td>\n" + 
+						"                            </tr>\n" + 
 						"                        ";
 			}
-			down += "\r\n" + 
-					"                        </tbody>\r\n" + 
-					"                    </table>\r\n" + 
-					"                </div>\r\n" + 
-					"            </div>\r\n" + 
-					"        </div>\r\n" + 
+			down += "\n" + 
+					"                        </tbody>\n" + 
+					"                    </table>\n" + 
+					"                </div>\n" + 
+					"            </div>\n" + 
+					"        </div>\n" + 
 					"        ";
 			++counter;
 		}
 		
-		down += "\r\n" + 
-				"        <script>\r\n" + 
-				"        function openNav(curID) {\r\n" + 
-				"            document.getElementById(curID).style.width = \"100%\";\r\n" + 
-				"        }\r\n" + 
-				"\r\n" + 
-				"\r\n" + 
-				"        function closeNav(curID) {\r\n" + 
-				"            document.getElementById(curID).style.width = \"0%\";\r\n" + 
-				"        }\r\n" + 
-				"        </script>\r\n" + 
+		down += "\n" + 
+				"        <script>\n" + 
+				"        function openNav(curID) {\n" + 
+				"            document.getElementById(curID).style.height = \"100%\";\n" + 
+				"        }\n" + 
+				"\n" + 
+				"\n" + 
+				"        function closeNav(curID) {\n" + 
+				"            document.getElementById(curID).style.height = \"0%\";\n" + 
+				"        }\n" + 
+				"        </script>\n" + 
 				"        ";
 				
 		return up + mid + down;
