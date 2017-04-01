@@ -129,6 +129,10 @@ div.scrollingHotSpotRightVisible { background-image: url(../img/b-circle-right-d
     border-left: 1px solid #949DA1;
  }
 
+ .datagrid table tbody .alt td {
+ 	background-color: rgba(0,0,0, 0.9)
+}
+
 /* SIDEBAR ------------------------------------------------------------*/
 
 #sidebar a{ color: #d1d1d1; }

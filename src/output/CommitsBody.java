@@ -43,20 +43,28 @@ public class CommitsBody {
 				"            <div class=\"overlay-content\">\n" + 
 				"                <div class=\"datagrid\">\n" + 
 				"                    <table>\n" + 
-				"                        <tbody>\n" + 
+				"                        <thead>\n" + 
 				"                            " +
 				"                            <tr>\n" + 
-				"                                <td><bold>AUTHOR</bold></td>\n" + 
-				"                                <td><bold>PERCENTAGE %</bold></td>\n" + 
-				"                            </tr>\n";
+				"                                <td><bold>Author</bold></td>\n" + 
+				"                                <td><bold>Percentage %</bold></td>\n" + 
+				"                            </tr>\n" +
+				"                        </thead>\n" +
+				"                        <tbody>\n";
 		
+		
+		int counter2 = 0;
 		for (String author : commitsPercent.commitsPerAuthor.keySet()){
-			mid += "\n" + 
-					"                            <tr>\n" + 
-					"                                <td>" +  author + "</td>\n" + 
-					"                                <td>" + String.format("%f", commitsPercent.commitsPerAuthor.get(author)*100) + "%</td>\n" + 
-					"                            </tr>\n" + 
-					"                        ";
+			mid += "\n";
+			if (counter2 % 2 == 0)	
+				mid += "                            <tr>\n";
+			else
+				mid += "                            <tr class=\"alt\">\n";	
+			mid += "                                <td>" +  author + "</td>\n" + 
+				"                                <td>" + String.format("%f", commitsPercent.commitsPerAuthor.get(author)*100) + "%</td>\n" + 
+				"                            </tr>\n" + 
+				"                        ";
+			++counter2;
 		}
 		
 		mid += "\n" + 
@@ -71,20 +79,28 @@ public class CommitsBody {
 				"            <div class=\"overlay-content\">\n" + 
 				"                <div class=\"datagrid\">\n" + 
 				"                    <table>\n" + 
-				"                        <tbody>\n" + 
+				"                        <thead>\n" + 
 				"                            " +
 				"                            <tr>\n" + 
-				"                                <td><bold>BRANCH</bold></td>\n" + 
-				"                                <td><bold>PERCENTAGE %</bold></td>\n" + 
-				"                            </tr>\n";
+				"                                <td><bold>Branch</bold></td>\n" + 
+				"                                <td><bold>Percentage %</bold></td>\n" + 
+				"                            </tr>\n" + 
+				"                        </thead>\n" + 
+				"                        <tbody>\n";
+
 		
+		counter2 = 0;
 		for (String branch : commitsPercent.commitsPerBranch.keySet()){
-			mid += "\n" + 
-					"                            <tr>\n" + 
-					"                                <td>" +  branch + "</td>\n" + 
-					"                                <td>" + String.format("%f", commitsPercent.commitsPerBranch.get(branch)*100) + "%</td>\n" + 
-					"                            </tr>\n" + 
-					"                        ";
+			mid += "\n";
+			if (counter2 % 2 == 0)	
+				mid += "                            <tr>\n";
+			else
+				mid += "                            <tr class=\"alt\">\n";	
+			mid += "                                <td>" +  branch + "</td>\n" + 
+				"                                <td>" + String.format("%f", commitsPercent.commitsPerBranch.get(branch)*100) + "%</td>\n" + 
+				"                            </tr>\n" + 
+				"                        ";
+			++counter2;
 		}
 		
 		mid += "\n" + 
@@ -104,15 +120,25 @@ public class CommitsBody {
 					"                                <h2 class=\"title-divider\">" + entry.getKey() + "</h2>\n" +
 					"                                <div class=\"datagrid\">\n" + 
 					"                                    <table>\n" + 
+					"                                        <thead>\n" +
+					"                                            <tr>\n" +
+					"                                                <td>Author</td>\n" + 
+					"                                                <td>Commits on this brach %</td>\n" + 
+					"                                        </thead>\n" + 
 					"                                        <tbody>\n" + 
 					"                                            ";
+			counter2 = 0;
 			for (String author : entry.getValue().keySet()) {
-				mid += "\n" + 
-						"                                    <tr>\n" + 
-						"                                        <td>" +  author + "</td>\n" + 
+				mid += "\n";
+				if (counter2 % 2 == 0)	
+					mid += "                                    <tr>\n";
+				else
+					mid += "                                    <tr class=\"alt\">\n";	
+				mid += "                                        <td>" +  author + "</td>\n" + 
 						"                                        <td>" + String.format("%f", entry.getValue().get(author)*100) + "%</td>\n" + 
 						"                                     </tr>\n" + 
 						"                                     ";				
+				++counter2;
 			}
 			mid +=	"                                        </tbody>\n" + 
 					"                                    </table>\n" + 

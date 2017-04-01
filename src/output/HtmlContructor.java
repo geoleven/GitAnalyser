@@ -74,6 +74,10 @@ public class HtmlContructor {
 		return CommitsBody.getBody(commitsPercent, commitsPerBranchPerAuthorPercent);
 	}
 	
+	private String getAuthorsBody() {
+		return AuthorsBody.getBody(comPerDayPerAuth, comPerWeekPerAuth, comPerMonthPerAuth, linesAddPerAuthPercent, linesRemPerAuthPercent, linesEdtPerAuthPercent);
+	}
+	
 	private void copyRescources() {
 		File sourceFiles = new File("./webfiles/");
 		try {
@@ -89,10 +93,12 @@ public class HtmlContructor {
 		String index = HEAD + MENU + getIndexBody() + FOOTER;
 		String branches = HEAD + MENU + getBranchesBody() + FOOTER;
 		String commits = HEAD + MENU + getCommitsBody() + FOOTER;
+		String authors = HEAD + MENU + getAuthorsBody() + FOOTER;
 			try {
 				FileUtils.writeStringToFile(new File(output + ((output.endsWith("/") || output.endsWith("\\")) ? "index.html" : "/index.html")) , index, (Charset)null);
 				FileUtils.writeStringToFile(new File(output + ((output.endsWith("/") || output.endsWith("\\")) ? "branches.html" : "/branches.html")) , branches, (Charset)null);
 				FileUtils.writeStringToFile(new File(output + ((output.endsWith("/") || output.endsWith("\\")) ? "commits.html" : "/commits.html")) , commits, (Charset)null);
+				FileUtils.writeStringToFile(new File(output + ((output.endsWith("/") || output.endsWith("\\")) ? "authors.html" : "/authors.html")) , authors, (Charset)null);
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.err.println("Could not write index.html!");
