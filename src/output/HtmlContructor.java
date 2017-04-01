@@ -1,6 +1,11 @@
 package output;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
+
+import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.Table;
 
@@ -9,6 +14,8 @@ import parser.PackageReturn;
 
 public class HtmlContructor {
 	
+	private String output;
+	private File outputFile;
 	private int totalFiles;
 	private long totalLines;
 	private int totalBranches;
@@ -24,19 +31,21 @@ public class HtmlContructor {
 	private HashMap <String, Double> linesRemPerAuthPercent;
 	private HashMap <String, Double> linesEdtPerAuthPercent;
 	
-	private static final String HEAD = "<!DOCTYPE html>\n<html>\n<head>\n<title>Git Analyser</title>\n</head>";
-	private String body1 = new String("<body>\n");
-	private String body2 = new String("</body>\n</html>");
+	private static final String HEAD = Head.getHead();
+	private static final String MENU = UpperMenu.getMenu();
+	private static final String FOOTER = Footer.getFooter();
 	
 	public String index = null;
 	public String branches = null;
 	public String percentages = null;
 	
 	
-	public HtmlContructor(int totalFiles, long totalLines, int totalBranches, int totalTags, int totalAuthors, 
+	public HtmlContructor(String output, File outputFile, int totalFiles, long totalLines, int totalBranches, int totalTags, int totalAuthors, 
 			HashMap<String, BranchInfo> branchInfo, PackageReturn commitsPrecent, Table<String, String, Double> commitsPerBranchPerAuthorPercent, 
 			HashMap<String, Double> comPerDayPerAuth, HashMap<String, Double> comPerWeekPerAuth, HashMap<String, Double> comPerMonthPerAuth, 
 			HashMap <String, Double> linesAddPerAuthPercent, HashMap <String, Double> linesRemPerAuthPercent, HashMap <String, Double> linesEdtPerAuthPercent) {
+		this.output = output;
+		this.outputFile = outputFile;
 		this.totalFiles = totalFiles;
 		this.totalLines = totalLines;
 		this.totalBranches = totalBranches;
@@ -53,46 +62,35 @@ public class HtmlContructor {
 		this.linesEdtPerAuthPercent = linesEdtPerAuthPercent;
 	}
 	
-	private void createIndex() {
-		body1 = body1.concat("<table style=\"width:100%\">"
-				+ "<tr>" 
-				+ "<td>" + "Total Files: " + "</td>"
-				+ "<td>" + totalFiles + "</td>"
-				+ "</tr>" + "<tr>"
-				+ "<td>" + "Total Lines: " + "</td>"
-				+ "<td>" + totalLines + "</td>"
-				+ "</tr>" + "</tr>"
-				+ "<td>" + "Total Branches: " + "</td>"
-				+ "<td>" + totalBranches + "</td>"
-				+ "</tr>" + "</tr>"
-				+ "<td>" + "Total Tags: " + "</td>"
-				+ "<td>" + totalTags + "</td>"
-				+ "</tr>" + "</tr>"
-				+ "<td>" + "Total Authors: " + "</td>"
-				+ "<td>" + totalAuthors + "</td>"
-				+ "</tr>" + "</tr>"
-				+ "</table");
+	private String getIndexBody() {
+		return IndexBody.getBody(totalFiles, totalLines, totalBranches, totalTags, totalAuthors);
 	}
 	
-	private void createBranchInfo() {
-		String result = "<table style=\"width:100%\">";
-		for (String branch : branchInfo.keySet() ) {
-			System.out.println(branch);
-			result += "<tr><td>"; 
-			result +=  "<button type=\"button\" onclick=\"alert('Hello world!')\">" + branch + "</button>"; 
-			result += "</td></tr>";
+	private String getBranchesBody() {
+		return BranchesBody.getBody(branchInfo);
+	}
+	
+	private void copyRescources() {
+		File sourceFiles = new File("./webfiles/");
+		try {
+			FileUtils.copyDirectory(sourceFiles, outputFile);
+		} catch (IOException e) {
+//			e.printStackTrace();
+			System.err.println("Could not properly copy html rescource files!");
 		}
-		result += "</table>";
-		System.out.println("\n" + result);
 	}
 	
-	public String render() {
-		createIndex();
-		String result = HEAD.concat(body1).concat(body2);
-		System.out.println(result);
-		
-		createBranchInfo();
-		return result;
+	public void render() {
+		copyRescources();
+		String index = HEAD + MENU + getIndexBody() + FOOTER;
+		String branches = HEAD + MENU + getBranchesBody() + FOOTER;
+			try {
+				FileUtils.writeStringToFile(new File(output + ((output.endsWith("/") || output.endsWith("\\")) ? "index.html" : "/index.html")) , index, (Charset)null);
+				FileUtils.writeStringToFile(new File(output + ((output.endsWith("/") || output.endsWith("\\")) ? "branches.html" : "/branches.html")) , branches, (Charset)null);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.err.println("Could not write index.html!");
+			}
 	}
 	
 	

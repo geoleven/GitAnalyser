@@ -22,9 +22,9 @@ public class Parse {
 	private static final String GIT_CMD = "C:\\Program Files\\Git\\bin\\git";
 	
 	private String input = null;
-//	private String output = null;
+	private String output = null;
 	private File inputFile = null;
-//	private File outputFile = null;
+	private File outputFile = null;
 	private ProcessBuilder pb = null; 
 	private String filels = null;
 	private HashMap<String, Integer> commitsPerAuthCount = null;
@@ -46,9 +46,9 @@ public class Parse {
 	
 	public Parse(ArgumentParser ap) {	
 		this.input = ap.input;
-//		this.output = ap.output;
+		this.output = ap.output;
 		this.inputFile = ap.inputFile;
-//		this.outputFile = ap.outputFile;
+		this.outputFile = ap.outputFile;
 	}
 
 //	3rd try XD
@@ -278,7 +278,7 @@ public class Parse {
 			
 			HashMap<String, String> tagToCommitMap = new HashMap<String, String>();
 			for (String tag : getAllTags().split("\r\n|\r|\n")) {
-				if (tag == null || tag == "" || tag == " " || tag == "\n")
+				if (tag == null || tag.equals("") || tag.equals(" ") || tag.equals("\n"))
 					continue;
 //				System.out.println("'"+tag+"'");
 //				System.out.println("'"+getPointedCommitOfTag(tag)+"'");
@@ -560,7 +560,7 @@ public class Parse {
 		/*_______________________________________________________________________________________________________________________________________________________________________*/
 		
 		if (render) {
-			html = new HtmlContructor(totalFiles, totalLines, totalBranches, totalTags, totalAuthors, 
+			html = new HtmlContructor(output, outputFile, totalFiles, totalLines, totalBranches, totalTags, totalAuthors, 
 			brancInfo, commitsPrecent, commitsPerBranchPerAuthorPercent, comPerDayPerAuth, comPerWeekPerAuth, 
 			comPerMonthPerAuth, linesAddPerAuthPercent, linesAddPerAuthPercent, linesAddPerAuthPercent);
 		}
