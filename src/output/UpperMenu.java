@@ -12,8 +12,8 @@ public class UpperMenu {
 			"                <ul>\n" + 
 			"                    <li><a href=\"index.html\">General</a></li>\n" + 
 			"                    <li><a href=\"branches.html\">Branches</a></li>\n" + 
-			"                    <li><a href=\"page-wide.html\">Commits' Stats</a></li>\n" + 
-			"                    <li><a href=\"page-fixed-footer.html\">Authors' Stats</a></li>\n" + 
+			"                    <li><a href=\"commits.html\">Commits' Stats</a></li>\n" + 
+			"                    <li><a href=\"authors.html\">Authors' Stats</a></li>\n" + 
 			"                </ul>\n" + 
 			"            </li>\n" + 
 			"            <li><a href=\"javascript:changeSkin('dark')\">Dark skin</a></li>\n" + 

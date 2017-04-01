@@ -263,8 +263,10 @@ public class Parse {
 			
 		String branches = getAllBranchesPlusLastCommit();
 		String[] branchesSplit = branches.split("\r\n|\r|\n");
+		
 		for (String br : branchesSplit) {
-			branchInfoMap.put(br.substring(0, br.indexOf('\t')), new BranchInfo(br.substring(0, br.indexOf('\t')), br.substring(br.indexOf('\t')+1)));
+			String bLastEdit = getCommitMessageOrDateOrAuthor(br.substring(br.indexOf('\t')+1), 1);
+			branchInfoMap.put(br.substring(0, br.indexOf('\t')), new BranchInfo(br.substring(0, br.indexOf('\t')), bLastEdit.substring(0, bLastEdit.length()-6)));
 		}
 	
 
@@ -305,17 +307,20 @@ public class Parse {
 						continue;
 					
 					// Ean einai to prwto commit tis alusidas orizoume to creation date tou san creation kai tis alusidas
-						if (curBrIn.isInitial()) {																					
-							curBrIn.bDate = getCommitMessageOrDateOrAuthor(commit, 1);
-						}
-						curBrIn.bCommits.add(new BranchCommits(commit, commitFullMessage, tagToCommitMap.get(commit)));
-						
-						String curAuth = getCommitMessageOrDateOrAuthor(commit, 2);						
-						if (commitsPerBranchPerAuthor.get(sbr, curAuth) == null) {
-							commitsPerBranchPerAuthor.put(sbr, curAuth, 1);
-						} else {
-							commitsPerBranchPerAuthor.put(sbr, curAuth, commitsPerBranchPerAuthor.get(sbr, curAuth) + 1);
-						}
+					String cDate = getCommitMessageOrDateOrAuthor(commit, 1);
+					if (curBrIn.isInitial()) {
+						curBrIn.bDate = cDate.substring(0, cDate.length()-6);
+					}
+					
+					String curAuth = getCommitMessageOrDateOrAuthor(commit, 2);	
+					
+					curBrIn.bCommits.add(new BranchCommits(commit, commitFullMessage, cDate, curAuth, tagToCommitMap.get(commit)));
+							
+					if (commitsPerBranchPerAuthor.get(sbr, curAuth) == null) {
+						commitsPerBranchPerAuthor.put(sbr, curAuth, 1);
+					} else {
+						commitsPerBranchPerAuthor.put(sbr, curAuth, commitsPerBranchPerAuthor.get(sbr, curAuth) + 1);
+					}
 				}
 			}
 		} catch (IOException e) {

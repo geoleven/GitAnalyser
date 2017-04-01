@@ -9,8 +9,8 @@ public class Footer {
 			"            <ul class=\"cat-list\">\n" + 
 			"                <li><a href=\"index.html\"> General </a></li>\n" + 
 			"                <li><a href=\"branches.html\"> Branches </a></li>\n" + 
-			"                <li><a href=\"#\"> Commits' Statistics  </a></li>\n" + 
-			"                <li><a href=\"#\"> Authors' Statistics  </a></li>\n" + 
+			"                <li><a href=\"commits.html\"> Commits' Statistics  </a></li>\n" + 
+			"                <li><a href=\"authors.html\"> Authors' Statistics  </a></li>\n" + 
 			"            </ul>\n" + 
 			"            <!-- ENDS project tags -->\n" + 
 			"        </div>\n" + 
@@ -52,6 +52,8 @@ public class Footer {
 			"    <!-- ENDS poshytip -->\n" + 
 			"    <script src=\"js/backstretch.js\"></script>\n" + 
 			"    <script src=\"js/custom.js\"></script>\n" + 
+//			"    <script src=\"js/popup/dist/jquery.fullscreen-popup.js\"></script>\n" + 
+//			"    <script> $(\".open-popup\").fullScreenPopup(); </script>\n" + 
 			"    <!-- ENDS JS -->\n" + 
 			"</body>\n" + 
 			"\n" + 
