@@ -221,7 +221,7 @@ body.wide-950 #page-wrap #content.fullwidth {
 }
 
 .datagrid table tbody td:first-child {
-	text-align: left;
+    text-align: left;
     border-left: none;
 }
 
@@ -248,9 +248,13 @@ body.wide-950 #page-wrap #content.fullwidth {
 /* Position the content inside the overlay */
 .overlay-content {
     position: relative;
-    top: 25%; /* 25% from the top */
-    width: 100%; /* 100% width */
-    text-align: center; /* Centered text/links */
+    margin: auto;
+    align-content: center;
+    align-self: center;
+    top: 10%; /* 25% from the top */
+    height: 80%;
+    width: 75%; /* 100% width */
+    /*text-align: center; /* Centered text/links */
     margin-top: 30px; /* 30px top margin to avoid conflict with the close button on smaller screens */
 }
 
@@ -274,7 +278,7 @@ body.wide-950 #page-wrap #content.fullwidth {
     position: absolute;
     top: 20px;
     right: 45px;
-    font-size: 60px;
+    font-size: 80px;
 }
 
 /* When the height of the screen is less than 450 pixels, change the font-size of the links and position the close button again, so they don't overlap */
