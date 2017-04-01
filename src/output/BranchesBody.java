@@ -49,7 +49,7 @@ public class BranchesBody {
 		
 		counter = 0;
 		for (String branch : branchInfo.keySet()) {
-			down += "        <div id=\"branch" + String.valueOf(counter) + "\" class=\"overlay\">\r\n" + 
+			down += "        <div id=\"branch" + String.valueOf(counter) + "\" class=\"overlay\" onclick=\"closeNav('branch" + String.valueOf(counter) + "')\">\r\n" + 
 					"        <a href=\"javascript:void(0)\" class=\"closebtn\" onclick=\"closeNav('branch" + String.valueOf(counter) + "')\">&times;</a>\n" + 
 					"            <div class=\"overlay-content\">\r\n" + 
 					"                <div class=\"datagrid\">\r\n" + 
